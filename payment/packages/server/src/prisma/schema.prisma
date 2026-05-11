@@ -1,0 +1,372 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 统一用户表 ====================
+model User {
+  id             Int       @id @default(autoincrement())
+  username       String?   @unique @db.VarChar(50)
+  passwordHash   String?   @db.VarChar(255)
+  role           String    @db.VarChar(20)
+  wechatOpenid   String?   @unique @db.VarChar(100)
+  wechatUnionid  String?   @db.VarChar(100)
+  name           String    @db.VarChar(50)
+  phone          String?   @db.VarChar(20)
+  avatarUrl      String?   @db.VarChar(255)
+  status         String    @default("active") @db.VarChar(20)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  student       Student?
+  teacher       Teacher?
+  parent        Parent?
+  gradesCreated Grade[]       @relation("GradeCreator")
+  attendances   Attendance[]
+  leaveApprovals LeaveRequest[]   @relation("LeaveApprover")
+  notices       Notice[]
+  rpRecords     RewardPunishment[]
+
+  @@index([role])
+  @@index([phone])
+  @@map("users")
+}
+
+// ==================== 学生表 ====================
+model Student {
+  id             Int       @id @default(autoincrement())
+  userId         Int?      @unique
+  studentNo      String    @unique @db.VarChar(20)
+  name           String    @db.VarChar(50)
+  gender         String    @db.VarChar(10)
+  birthDate      DateTime?
+  idCard         String?   @db.VarChar(255)
+  address        String?   @db.VarChar(255)
+  nativePlace    String?   @db.VarChar(100)
+  hobbies        String?   @db.VarChar(255)
+  photoUrl       String?   @db.VarChar(255)
+  classId        Int?
+  dormitoryId    Int?
+  enrollmentDate DateTime?
+  status         String    @default("active") @db.VarChar(20)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user              User?               @relation(fields: [userId], references: [id])
+  class             Class?               @relation(fields: [classId], references: [id])
+  dormitory         DormitoryRoom?       @relation(fields: [dormitoryId], references: [id])
+  parents           Parent[]
+  grades            Grade[]
+  attendances       Attendance[]
+  leaveRequests     LeaveRequest[]
+  payments          Payment[]
+  rewardsPunishments RewardPunishment[]
+
+  @@index([studentNo])
+  @@index([classId])
+  @@map("students")
+}
+
+// ==================== 家长表 ====================
+model Parent {
+  id         Int     @id @default(autoincrement())
+  userId     Int?    @unique
+  studentId  Int
+  relation   String  @db.VarChar(20)
+  name       String  @db.VarChar(50)
+  phone      String  @db.VarChar(20)
+  occupation String? @db.VarChar(100)
+  isPrimary  Boolean @default(false)
+
+  user    User?    @relation(fields: [userId], references: [id])
+  student Student  @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@map("parents")
+}
+
+// ==================== 教师表 ====================
+model Teacher {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @unique
+  teacherNo String  @unique @db.VarChar(20)
+  name      String  @db.VarChar(50)
+  title     String? @db.VarChar(50)
+  subject   String? @db.VarChar(50)
+  phone     String? @db.VarChar(20)
+
+  user          User     @relation(fields: [userId], references: [id])
+  homeroomClasses Class[]
+  courses       Course[]
+
+  @@index([teacherNo])
+  @@map("teachers")
+}
+
+// ==================== 班级表 ====================
+model Class {
+  id                Int      @id @default(autoincrement())
+  name              String   @db.VarChar(50)
+  gradeLevel        String   @db.VarChar(10)
+  homeroomTeacherId Int?
+  academicYear      String   @db.VarChar(9)
+  studentCount      Int      @default(0)
+  status            String   @default("active") @db.VarChar(20)
+  createdAt         DateTime @default(now())
+
+  homeroomTeacher Teacher?    @relation(fields: [homeroomTeacherId], references: [id])
+  students        Student[]
+  timetables      Timetable[]
+
+  @@index([gradeLevel, academicYear])
+  @@map("classes")
+}
+
+// ==================== 课程表 ====================
+model Course {
+  id           Int     @id @default(autoincrement())
+  name         String  @db.VarChar(100)
+  code         String  @unique @db.VarChar(20)
+  gradeLevel   String  @db.VarChar(10)
+  teacherId    Int?
+  weeklyHours  Int     @default(1)
+  semester     String  @db.VarChar(10)
+  academicYear String  @db.VarChar(9)
+  status       String  @default("active") @db.VarChar(20)
+
+  teacher    Teacher?     @relation(fields: [teacherId], references: [id])
+  timetables Timetable[]
+  grades     Grade[]
+
+  @@index([gradeLevel, semester])
+  @@map("courses")
+}
+
+// ==================== 课表 ====================
+model Timetable {
+  id           Int     @id @default(autoincrement())
+  classId      Int
+  courseId     Int
+  dayOfWeek    Int
+  period       Int
+  classroom    String? @db.VarChar(100)
+  semester     String  @db.VarChar(10)
+  academicYear String  @db.VarChar(9)
+
+  class  Class  @relation(fields: [classId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([classId, dayOfWeek, period, semester, academicYear])
+  @@index([classId, semester])
+  @@map("timetables")
+}
+
+// ==================== 考试类型 ====================
+model ExamType {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(50)
+  semester     String   @db.VarChar(10)
+  academicYear String   @db.VarChar(9)
+  examDate     DateTime?
+  weight       Decimal? @db.Decimal(3, 2)
+
+  grades Grade[]
+
+  @@unique([name, semester, academicYear])
+  @@map("exam_types")
+}
+
+// ==================== 成绩表 ====================
+model Grade {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  courseId    Int
+  examTypeId  Int
+  score       Decimal  @db.Decimal(5, 1)
+  classRank   Int?
+  gradeRank   Int?
+  totalScore  Decimal? @db.Decimal(7, 1)
+  isPublished Boolean  @default(false)
+  createdBy   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student   Student   @relation(fields: [studentId], references: [id])
+  course    Course    @relation(fields: [courseId], references: [id])
+  examType  ExamType  @relation(fields: [examTypeId], references: [id])
+  creator   User?     @relation("GradeCreator", fields: [createdBy], references: [id])
+
+  @@unique([studentId, courseId, examTypeId])
+  @@index([examTypeId, courseId])
+  @@index([studentId, examTypeId])
+  @@map("grades")
+}
+
+// ==================== 考勤表 ====================
+model Attendance {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  recordDate DateTime
+  period     String   @db.VarChar(20)
+  status     String   @db.VarChar(20)
+  remark     String?  @db.VarChar(255)
+  recordedBy Int?
+  createdAt  DateTime @default(now())
+
+  student  Student @relation(fields: [studentId], references: [id])
+  recorder User?   @relation(fields: [recordedBy], references: [id])
+
+  @@unique([studentId, recordDate, period])
+  @@index([recordDate])
+  @@map("attendance")
+}
+
+// ==================== 请假申请表 ====================
+model LeaveRequest {
+  id             Int      @id @default(autoincrement())
+  studentId      Int
+  startDate      DateTime
+  endDate        DateTime
+  leaveType      String   @db.VarChar(20)
+  reason         String   @db.Text
+  attachmentUrl  String?  @db.VarChar(255)
+  status         String   @default("pending") @db.VarChar(20)
+  approvedBy     Int?
+  approvalRemark String?  @db.VarChar(255)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  student  Student @relation(fields: [studentId], references: [id])
+  approver User?   @relation("LeaveApprover", fields: [approvedBy], references: [id])
+
+  @@index([studentId])
+  @@map("leave_requests")
+}
+
+// ==================== 费用项目表 ====================
+model FeeItem {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  amount       Decimal  @db.Decimal(10, 2)
+  feeType      String   @db.VarChar(20)
+  gradeLevel   String?  @db.VarChar(10)
+  semester     String   @db.VarChar(10)
+  academicYear String   @db.VarChar(9)
+  dueDate      DateTime?
+  description  String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  payments Payment[]
+
+  @@map("fee_items")
+}
+
+// ==================== 缴费记录表 ====================
+model Payment {
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  feeItemId     Int
+  amount        Decimal  @db.Decimal(10, 2)
+  paidAmount    Decimal  @default(0) @db.Decimal(10, 2)
+  status        String   @default("unpaid") @db.VarChar(20)
+  transactionId String?  @db.VarChar(64)
+  paidAt        DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  student  Student  @relation(fields: [studentId], references: [id])
+  feeItem  FeeItem  @relation(fields: [feeItemId], references: [id])
+
+  @@unique([studentId, feeItemId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ==================== 通知公告表 ====================
+model Notice {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(200)
+  content     String   @db.Text
+  category    String   @db.VarChar(20)
+  targetType  String   @db.VarChar(20)
+  targetId    Int?
+  publisherId Int
+  isPinned    Boolean  @default(false)
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  publisher User @relation(fields: [publisherId], references: [id])
+
+  @@index([targetType, targetId])
+  @@map("notices")
+}
+
+// ==================== 宿舍楼表 ====================
+model DormitoryBuilding {
+  id           Int     @id @default(autoincrement())
+  name         String  @db.VarChar(50)
+  buildingType String  @db.VarChar(10)
+  floorCount   Int
+  description  String? @db.VarChar(255)
+
+  rooms DormitoryRoom[]
+
+  @@map("dormitory_buildings")
+}
+
+// ==================== 宿舍房间表 ====================
+model DormitoryRoom {
+  id         Int     @id @default(autoincrement())
+  buildingId Int
+  roomNumber String  @db.VarChar(20)
+  capacity   Int     @default(4)
+  occupied   Int     @default(0)
+  status     String  @default("available") @db.VarChar(20)
+
+  building  DormitoryBuilding @relation(fields: [buildingId], references: [id])
+  students  Student[]
+
+  @@unique([buildingId, roomNumber])
+  @@map("dormitory_rooms")
+}
+
+// ==================== 奖惩记录表 ====================
+model RewardPunishment {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  type        String   @db.VarChar(20)
+  category    String   @db.VarChar(50)
+  description String   @db.Text
+  recordDate  DateTime
+  recordedBy  Int?
+  createdAt   DateTime @default(now())
+
+  student  Student @relation(fields: [studentId], references: [id])
+  recorder User?   @relation(fields: [recordedBy], references: [id])
+
+  @@index([studentId])
+  @@map("rewards_punishments")
+}
+
+// ==================== 审计日志表 ====================
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  action     String   @db.VarChar(50)
+  targetType String   @db.VarChar(50)
+  targetId   Int?
+  detail     String?  @db.Text
+  ipAddress  String?  @db.VarChar(45)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

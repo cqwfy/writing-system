@@ -1,0 +1,14 @@
+{
+  "name": "school-management-system",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter server dev",
+    "dev:admin": "pnpm --filter admin dev",
+    "build": "pnpm --filter shared build && pnpm --filter server build && pnpm --filter admin build",
+    "db:migrate": "pnpm --filter server prisma migrate dev",
+    "db:studio": "pnpm --filter server prisma studio",
+    "db:seed": "pnpm --filter server prisma db seed",
+    "lint": "pnpm -r lint",
+    "deploy": "bash scripts/deploy.sh"
+  }
+}
