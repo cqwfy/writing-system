@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="header">
+    <view class="logo">🏫</view>
+    <view class="title">学校管理系统</view>
+    <view class="subtitle">家长/学生端</view>
+  </view>
+
+  <!-- 微信登录 -->
+  <view wx:if="{{!showBind}}" class="login-box">
+    <button
+      class="wechat-btn"
+      type="primary"
+      loading="{{isLoading}}"
+      bindtap="handleWechatLogin"
+    >
+      微信一键登录
+    </button>
+    <view class="tip">点击上方按钮，授权微信登录</view>
+  </view>
+
+  <!-- 绑定账号 -->
+  <view wx:if="{{showBind}}" class="bind-box">
+    <view class="bind-title">绑定账号</view>
+    <view class="bind-desc">首次登录，请绑定您的身份信息</view>
+
+    <view class="bind-type">
+      <view
+        class="type-item {{bindType === 'student_no' ? 'active' : ''}}"
+        data-value="student_no"
+        bindtap="onBindTypeChange"
+      >
+        <view>学生</view>
+        <view class="type-desc">通过学号绑定</view>
+      </view>
+      <view
+        class="type-item {{bindType === 'parent_phone' ? 'active' : ''}}"
+        data-value="parent_phone"
+        bindtap="onBindTypeChange"
+      >
+        <view>家长</view>
+        <view class="type-desc">通过手机号绑定</view>
+      </view>
+    </view>
+
+    <view class="input-group">
+      <input
+        class="input"
+        placeholder="{{bindType === 'student_no' ? '请输入学号' : '请输入手机号'}}"
+        value="{{bindValue}}"
+        bindinput="onBindValueInput"
+      />
+    </view>
+
+    <button class="bind-btn" type="primary" loading="{{isLoading}}" bindtap="handleBind">
+      确认绑定
+    </button>
+    <view class="skip-link" bindtap="handleSkip">稍后绑定</view>
+  </view>
+</view>

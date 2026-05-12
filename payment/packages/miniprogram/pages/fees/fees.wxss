@@ -1,0 +1,86 @@
+.container {
+  padding: 24rpx;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #1677ff, #0958d9);
+  border-radius: 16rpx;
+  padding: 40rpx;
+  margin-bottom: 24rpx;
+  color: #fff;
+  text-align: center;
+}
+
+.summary-label {
+  font-size: 26rpx;
+  opacity: 0.9;
+}
+
+.summary-amount {
+  font-size: 56rpx;
+  font-weight: bold;
+  margin: 12rpx 0;
+}
+
+.summary-hint {
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 120rpx 0;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.payment-item {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.item-name {
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+.item-status {
+  font-size: 24rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 6rpx;
+}
+
+.item-status.unpaid { background: #fff2f0; color: #ff4d4f; }
+.item-status.partial { background: #fff7e6; color: #fa8c16; }
+.item-status.paid { background: #f6ffed; color: #52c41a; }
+.item-status.waived { background: #f5f5f5; color: #999; }
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8rpx 0;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333;
+}

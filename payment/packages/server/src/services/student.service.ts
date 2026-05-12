@@ -2,6 +2,7 @@ import { PrismaClient, Prisma } from "@prisma/client";
 import { AppError } from "../middleware/error-handler";
 import ExcelJS from "exceljs";
 import sharp from "sharp";
+import bcrypt from "bcryptjs";
 import path from "path";
 import fs from "fs";
 
@@ -98,12 +99,16 @@ export class StudentService {
     const existing = await prisma.student.findUnique({ where: { studentNo: data.studentNo } });
     if (existing) throw new AppError(400, `学号 ${data.studentNo} 已存在`);
 
+    // 预先生成密码哈希
+    const studentHash = await bcrypt.hash("Student@123", 10);
+    const parentHash = await bcrypt.hash("Parent@123", 10);
+
     return prisma.$transaction(async (tx) => {
       // 创建学生用户
       const user = await tx.user.create({
         data: {
           username: `stu_${data.studentNo}`,
-          passwordHash: null,
+          passwordHash: studentHash,
           role: "student",
           name: data.name,
         },
@@ -131,7 +136,7 @@ export class StudentService {
         const fatherUser = await tx.user.create({
           data: {
             username: `parent_${data.studentNo}_f`,
-            passwordHash: null,
+            passwordHash: parentHash,
             role: "parent",
             name: data.fatherName || `${data.name}父亲`,
             phone: data.fatherPhone,
@@ -153,7 +158,7 @@ export class StudentService {
         const motherUser = await tx.user.create({
           data: {
             username: `parent_${data.studentNo}_m`,
-            passwordHash: null,
+            passwordHash: parentHash,
             role: "parent",
             name: data.motherName || `${data.name}母亲`,
             phone: data.motherPhone,

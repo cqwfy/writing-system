@@ -54,6 +54,17 @@ export class DormitoryService {
       prisma.dormitoryRoom.update({ where: { id: roomId }, data: { occupied: { increment: -1 } } }),
     ]);
   }
+
+  async getMyDormitory(studentId: number) {
+    const student = await prisma.student.findFirst({
+      where: { id: studentId, deletedAt: null },
+      include: {
+        dormitory: { include: { building: { select: { id: true, name: true, buildingType: true } } } },
+      },
+    });
+    if (!student) throw new AppError(404, "学生不存在");
+    return student.dormitory || null;
+  }
 }
 
 export const dormitoryService = new DormitoryService();

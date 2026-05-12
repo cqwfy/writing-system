@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/grades/grades",
+    "pages/attendance/attendance",
+    "pages/fees/fees",
+    "pages/notices/notices",
+    "pages/dormitory/dormitory",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#1677ff",
+    "navigationBarTitleText": "学校管理系统",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#1677ff",
+    "backgroundColor": "#fff",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页", "iconPath": "" },
+      { "pagePath": "pages/grades/grades", "text": "成绩", "iconPath": "" },
+      { "pagePath": "pages/notices/notices", "text": "通知", "iconPath": "" },
+      { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

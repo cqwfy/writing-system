@@ -10,5 +10,9 @@ dormitoryRouter.get("/buildings", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req
 dormitoryRouter.post("/buildings", rbacMiddleware(Role.ADMIN), (req, res, next) => dormitoryController.createBuilding(req, res, next));
 dormitoryRouter.get("/rooms", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => dormitoryController.listRooms(req, res, next));
 dormitoryRouter.post("/rooms", rbacMiddleware(Role.ADMIN), (req, res, next) => dormitoryController.createRoom(req, res, next));
+
+// 学生/家长端
+dormitoryRouter.get("/my", (req, res, next) => dormitoryController.getMyDormitory(req, res, next));
+
 dormitoryRouter.put("/rooms/:roomId/assign", rbacMiddleware(Role.ADMIN), (req, res, next) => dormitoryController.assignStudent(req, res, next));
 dormitoryRouter.put("/rooms/:roomId/remove", rbacMiddleware(Role.ADMIN), (req, res, next) => dormitoryController.removeStudent(req, res, next));

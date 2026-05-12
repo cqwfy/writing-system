@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button, message, Modal, Tag, Space, Form, Select, Input, DatePicker, Popconfirm } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
@@ -20,6 +20,17 @@ export function RewardListPage() {
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [students, setStudents] = useState<{ id: number; name: string; studentNo: string }[]>([]);
+
+  useEffect(() => {
+    api.get("/students", { params: { pageSize: 1000 } }).then((res) => {
+      setStudents((res.data.data?.data || []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        studentNo: s.studentNo,
+      })));
+    });
+  }, []);
 
   const handleSubmit = async (values: Record<string, unknown>) => {
     setLoading(true);
@@ -104,10 +115,15 @@ export function RewardListPage() {
           <Form.Item name="category" label="类别" rules={[{ required: true }]}>
             <Input placeholder="如 三好学生、违纪等" />
           </Form.Item>
-          <Form.Item name="studentId" label="学生ID" rules={[{ required: true }]}>
-            <Input placeholder="输入学生ID" />
+          <Form.Item name="studentId" label="选择学生" rules={[{ required: true }]}>
+            <Select
+              showSearch
+              placeholder="搜索学生姓名或学号"
+              optionFilterProp="label"
+              options={students.map((s) => ({ label: `${s.name} (${s.studentNo})`, value: s.id }))}
+            />
           </Form.Item>
-          <Form.Item name="description" label="描述">
+          <Form.Item name="description" label="描述" rules={[{ required: true }]}>
             <Input.TextArea rows={3} />
           </Form.Item>
           <Form.Item name="recordDate" label="日期">

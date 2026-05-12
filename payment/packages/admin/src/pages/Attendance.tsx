@@ -134,7 +134,7 @@ export function AttendancePage() {
             columns={leaveColumns}
             request={async (params) => {
               const res = await api.get("/attendance/leave-requests", { params: { page: params.current, pageSize: params.pageSize } });
-              return { data: res.data.data, total: res.data.total, success: true };
+              return { data: res.data.data.data, total: res.data.data.total, success: true };
             }}
             actionRef={leaveActionRef}
             rowKey="id"

@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="user-card" wx:if="{{userInfo}}">
+    <view class="avatar">👤</view>
+    <view class="user-name">{{userInfo.name}}</view>
+    <view class="user-role">{{userInfo.student ? '学生 · ' + userInfo.student.studentNo : '家长'}}</view>
+  </view>
+
+  <view class="menu-grid">
+    <view class="menu-item" bindtap="goToGrades">
+      <view class="menu-icon">📊</view>
+      <view class="menu-label">成绩查询</view>
+    </view>
+    <view class="menu-item" bindtap="goToAttendance">
+      <view class="menu-icon">📋</view>
+      <view class="menu-label">考勤记录</view>
+    </view>
+    <view class="menu-item" bindtap="goToFees">
+      <view class="menu-icon">💰</view>
+      <view class="menu-label">费用中心</view>
+    </view>
+    <view class="menu-item" bindtap="goToNotices">
+      <view class="menu-icon">📢</view>
+      <view class="menu-label">通知公告</view>
+    </view>
+    <view class="menu-item" bindtap="goToProfile">
+      <view class="menu-icon">⚙️</view>
+      <view class="menu-label">个人中心</view>
+    </view>
+  </view>
+</view>

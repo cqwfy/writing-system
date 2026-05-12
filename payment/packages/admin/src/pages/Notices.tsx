@@ -3,6 +3,7 @@ import { Button, message, Modal, Tag, Space, Form, Input, Select, Popconfirm } f
 import { PlusOutlined, SendOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
+import { useAuthStore } from "../stores/auth";
 import api from "../services/api";
 
 interface NoticeRecord {
@@ -23,6 +24,8 @@ export function NoticeListPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const { user } = useAuthStore();
+  const isStudentOrParent = user?.role === "student" || user?.role === "parent";
 
   const handleSubmit = async (values: Record<string, unknown>) => {
     setLoading(true);
@@ -53,10 +56,10 @@ export function NoticeListPage() {
       key: "category",
       width: 100,
       valueType: "select",
-      valueEnum: { general: "一般", important: "重要", urgent: "紧急" },
+      valueEnum: { notice: "通知", announcement: "公告", homework: "作业", event: "活动", communication: "沟通" },
       render: (_, r) => {
-        const colors: Record<string, string> = { general: "blue", important: "orange", urgent: "red" };
-        const labels: Record<string, string> = { general: "一般", important: "重要", urgent: "紧急" };
+        const colors: Record<string, string> = { notice: "blue", announcement: "orange", homework: "purple", event: "green", communication: "default" };
+        const labels: Record<string, string> = { notice: "通知", announcement: "公告", homework: "作业", event: "活动", communication: "沟通" };
         return <Tag color={colors[r.category]}>{labels[r.category] || r.category}</Tag>;
       },
     },
@@ -82,8 +85,9 @@ export function NoticeListPage() {
     {
       title: "操作",
       key: "action",
-      width: 200,
-      render: (_, record) => (
+      width: isStudentOrParent ? 0 : 200,
+      hideInTable: isStudentOrParent,
+      render: isStudentOrParent ? undefined : (_, record) => (
         <Space>
           <Button type="link" onClick={() => {
             setEditingId(record.id);
@@ -123,7 +127,7 @@ export function NoticeListPage() {
         rowKey="id"
         search={{ labelWidth: "auto" }}
         headerTitle="通知公告"
-        toolBarRender={() => [
+        toolBarRender={() => isStudentOrParent ? [] : [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
             setEditingId(null);
             form.resetFields();
@@ -143,7 +147,7 @@ export function NoticeListPage() {
           <Space style={{ display: "flex", gap: 16 }}>
             <Form.Item name="category" label="类别" rules={[{ required: true }]} style={{ width: 200 }}>
               <Select options={[
-                { label: "一般", value: "general" }, { label: "重要", value: "important" }, { label: "紧急", value: "urgent" },
+                { label: "通知", value: "notice" }, { label: "公告", value: "announcement" }, { label: "作业", value: "homework" }, { label: "活动", value: "event" }, { label: "沟通", value: "communication" },
               ]} />
             </Form.Item>
             <Form.Item name="targetType" label="目标范围" rules={[{ required: true }]} style={{ width: 200 }}>

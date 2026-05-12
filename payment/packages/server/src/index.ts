@@ -16,6 +16,7 @@ import { feeRouter } from "./routes/fee.routes";
 import { dormitoryRouter } from "./routes/dormitory.routes";
 import { rewardRouter } from "./routes/reward.routes";
 import { teacherRouter } from "./routes/teacher.routes";
+import { dashboardRouter } from "./routes/dashboard.routes";
 import path from "path";
 
 const logger = pino({
@@ -50,6 +51,7 @@ export async function createApp() {
   app.use("/api/v1/dormitories", dormitoryRouter);
   app.use("/api/v1/rewards", rewardRouter);
 app.use("/api/v1/teachers", teacherRouter);
+  app.use("/api/v1/dashboard", dashboardRouter);
 
   // 静态文件（上传的图片）
   app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));

@@ -6,12 +6,13 @@ const prisma = new PrismaClient();
 export class NoticeService {
   async list(params: { page?: number; pageSize?: number; category?: string; targetType?: string; role?: string; studentId?: number; classId?: number; gradeLevel?: string }) {
     const { page = 1, pageSize = 20, category, role, studentId, classId, gradeLevel } = params;
-    const where: Prisma.NoticeWhereInput = { isPublished: true };
+    const where: Prisma.NoticeWhereInput = {};
 
     if (category) where.category = category;
 
     // 按角色和目标过滤可见通知
     if (role === "student" || role === "parent") {
+      where.isPublished = true;
       where.OR = [
         { targetType: "all" },
         { targetType: "grade", targetId: gradeLevel ? parseInt(gradeLevel) : undefined },

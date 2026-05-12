@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { Button, message, Modal, Tag, Space, Form, Select, InputNumber, Tabs, Descriptions, Card, Statistic, Row, Col, Table } from "antd";
-import { PlusOutlined, SendOutlined, BarChartOutlined } from "@ant-design/icons";
+import { Button, message, Modal, Tag, Space, Form, Select, InputNumber, DatePicker, Tabs, Descriptions, Card, Statistic, Row, Col, Table } from "antd";
+import { PlusOutlined, SendOutlined, BarChartOutlined, DeleteOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
@@ -12,6 +12,7 @@ interface ExamRecord {
   academicYear: string;
   examDate: string | null;
   weight: number | null;
+  month: number | null;
 }
 
 interface GradeRecord {
@@ -41,13 +42,22 @@ export function GradesPage() {
   const [loading, setLoading] = useState(false);
   const [examTypeName, setExamTypeName] = useState<string>("");
 
+  const loadExamOptions = () => {
+    api.get("/grades/exams").then((res) => {
+      const exams = res.data.data || [];
+      setExamOptions(exams.map((e: any) => {
+        let suffix = e.academicYear;
+        if (e.month) suffix += ` ${e.month}月`;
+        else suffix += e.semester === "first" ? " 上学期" : " 下学期";
+        return { label: `${e.name}（${suffix}）`, value: e.id };
+      }));
+    });
+  };
+
   useEffect(() => {
     api.get("/courses/all").then((res) => setCourses(res.data.data || []));
     api.get("/classes/all").then((res) => setClasses(res.data.data || []));
-    api.get("/grades/exams").then((res) => {
-      const exams = res.data.data || [];
-      setExamOptions(exams.map((e: any) => ({ label: `${e.name}（${e.academicYear} ${e.semester === "first" ? "上" : "下"}）`, value: e.id })));
-    });
+    loadExamOptions();
   }, []);
 
   const loadClassStudents = async (classId: number) => {
@@ -57,15 +67,19 @@ export function GradesPage() {
   };
 
   const examColumns: ProColumns<ExamRecord>[] = [
-    { title: "考试名称", dataIndex: "name", key: "name", width: 150 },
+    { title: "考试名称", dataIndex: "name", key: "name", width: 120 },
+    { title: "学年", dataIndex: "academicYear", key: "academicYear", width: 100 },
     {
-      title: "学期", dataIndex: "semester", key: "semester", width: 100,
-      render: (_, r) => r.semester === "first" ? "上学期" : "下学期",
+      title: "学期", dataIndex: "semester", key: "semester", width: 80,
+      render: (_, r) => r.semester === "first" ? "上学期" : r.semester === "second" ? "下学期" : "-",
     },
-    { title: "学年", dataIndex: "academicYear", key: "academicYear", width: 120 },
+    {
+      title: "月份", dataIndex: "month", key: "month", width: 60,
+      render: (_, r) => (r as any).month ? `${(r as any).month}月` : "-",
+    },
     { title: "考试日期", dataIndex: "examDate", key: "examDate", width: 120, valueType: "date" },
     {
-      title: "操作", key: "action", width: 280,
+      title: "操作", key: "action", width: 360,
       render: (_, record) => (
         <Space>
           <Button type="link" onClick={() => {
@@ -94,6 +108,17 @@ export function GradesPage() {
               message.error(err.response?.data?.error || "获取统计失败");
             }
           }}>统计</Button>
+          <Button type="link" danger icon={<DeleteOutlined />} onClick={async () => {
+            try {
+              await api.delete(`/grades/exams/${record.id}`);
+              message.success("已删除");
+              loadExamOptions();
+              examActionRef.current?.reload();
+              gradeActionRef.current?.reload();
+            } catch (err: any) {
+              message.error(err.response?.data?.error || "删除失败");
+            }
+          }}>删除</Button>
         </Space>
       ),
     },
@@ -133,16 +158,12 @@ export function GradesPage() {
   const handleCreateExam = async (values: Record<string, unknown>) => {
     setLoading(true);
     try {
-      const payload = { ...values };
-      if (values.name === "月考" && values.examMonth) {
-        payload.name = `${values.examMonth}月月考`;
-      }
-      delete payload.examMonth;
-      await api.post("/grades/exams", payload);
+      await api.post("/grades/exams", values);
       message.success("创建考试成功");
       setExamModalVisible(false);
       examForm.resetFields();
       setExamTypeName("");
+      loadExamOptions();
       examActionRef.current?.reload();
     } catch (err: any) {
       message.error(err.response?.data?.error || "创建失败");
@@ -200,25 +221,27 @@ export function GradesPage() {
                 <Form.Item name="name" label="考试名称" rules={[{ required: true }]}>
                   <Select
                     options={[{ label: "月考", value: "月考" }, { label: "期中考试", value: "期中考试" }, { label: "期末考试", value: "期末考试" }]}
-                    onChange={(val) => { setExamTypeName(val); examForm.resetFields(["examMonth"]); }}
+                    onChange={(val) => { setExamTypeName(val); examForm.resetFields(["semester", "month"]); }}
                   />
                 </Form.Item>
-                {examTypeName === "月考" && (
-                  <Form.Item name="examMonth" label="选择月份" rules={[{ required: true, message: "请选择月份" }]}>
+                <Form.Item name="academicYear" label="学年" rules={[{ required: true }]}>
+                  <Select options={[{ label: "2026-2027", value: "2026-2027" }, { label: "2025-2026", value: "2025-2026" }]} />
+                </Form.Item>
+                {examTypeName === "月考" ? (
+                  <Form.Item name="month" label="选择月份" rules={[{ required: true, message: "请选择月份" }]}>
                     <Select
                       placeholder="选择月份"
                       options={Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}月`, value: i + 1 }))}
                     />
                   </Form.Item>
-                )}
-                <Space style={{ display: "flex", gap: 16 }}>
-                  <Form.Item name="semester" label="学期" rules={[{ required: true }]} style={{ width: 200 }}>
+                ) : examTypeName ? (
+                  <Form.Item name="semester" label="学期" rules={[{ required: true, message: "请选择学期" }]}>
                     <Select options={[{ label: "上学期", value: "first" }, { label: "下学期", value: "second" }]} />
                   </Form.Item>
-                  <Form.Item name="academicYear" label="学年" rules={[{ required: true }]} style={{ width: 200 }}>
-                    <Select options={[{ label: "2026-2027", value: "2026-2027" }, { label: "2025-2026", value: "2025-2026" }]} />
-                  </Form.Item>
-                </Space>
+                ) : null}
+                <Form.Item name="examDate" label="考试日期">
+                  <DatePicker style={{ width: "100%" }} placeholder="选择考试日期" />
+                </Form.Item>
               </Form>
             </Modal>
           </div>

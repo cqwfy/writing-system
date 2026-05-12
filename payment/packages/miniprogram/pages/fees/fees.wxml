@@ -1,0 +1,40 @@
+<view class="container">
+  <!-- 待缴汇总 -->
+  <view class="summary-card" wx:if="{{totalUnpaid > 0}}">
+    <view class="summary-label">待缴费用</view>
+    <view class="summary-amount">¥{{totalUnpaid}}</view>
+    <view class="summary-hint">请及时完成缴费</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:if="{{payments.length === 0 && !loading}}" class="empty">
+    <view class="empty-icon">💰</view>
+    <view class="empty-text">暂无费用记录</view>
+  </view>
+
+  <view class="payment-list">
+    <view class="payment-item" wx:for="{{payments}}" wx:key="id" wx:for-item="p">
+      <view class="payment-header">
+        <view class="item-name">{{p.itemName || '-'}}</view>
+        <view class="item-status {{p.status}}">{{p.statusText}}</view>
+      </view>
+      <view class="payment-body">
+        <view class="payment-info">
+          <view class="info-row">
+            <text class="info-label">金额</text>
+            <text class="info-value">¥{{p.itemAmount || 0}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">已缴</text>
+            <text class="info-value">¥{{p.paidAmount || 0}}</text>
+          </view>
+          <view class="info-row" wx:if="{{p.dueDate}}">
+            <text class="info-label">截止日期</text>
+            <text class="info-value">{{p.dueDate}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

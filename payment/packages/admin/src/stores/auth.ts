@@ -7,7 +7,10 @@ interface User {
   name: string;
   phone: string;
   avatarUrl: string | null;
+  status?: string;
   teacher?: { id: number; teacherNo: string; subject: string };
+  student?: { id: number; studentNo: string; name: string; classId: number; className: string | null; photoUrl: string | null };
+  parent?: { id: number; studentId: number; studentName: string | null };
 }
 
 interface AuthState {

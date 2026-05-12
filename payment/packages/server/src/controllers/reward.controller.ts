@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
+import { Prisma } from "@prisma/client";
 import { rewardService } from "../services/reward.service";
 import { createRewardPunishmentSchema } from "@sms/shared";
+import { AppError } from "../middleware/error-handler";
 
 export class RewardController {
   async list(req: Request, res: Response, next: NextFunction) {
@@ -29,7 +31,13 @@ export class RewardController {
       const data = createRewardPunishmentSchema.parse(req.body);
       const result = await rewardService.create(data, req.user!.id);
       res.status(201).json({ success: true, data: result });
-    } catch (err) { next(err); }
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
+        next(new AppError(400, "学生不存在，请检查学生ID"));
+      } else {
+        next(err);
+      }
+    }
   }
 
   async delete(req: Request, res: Response, next: NextFunction) {

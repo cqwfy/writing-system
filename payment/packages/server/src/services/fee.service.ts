@@ -22,7 +22,7 @@ export class FeeService {
 
   async listPayments(params: { studentId?: number; classId?: number; status?: string; page?: number; pageSize?: number }) {
     const { page = 1, pageSize = 20, studentId, classId, status } = params;
-    const where: any = {};
+    const where: any = { student: { deletedAt: null } };
     if (studentId) where.studentId = studentId;
     if (status) where.status = status;
     if (classId) {

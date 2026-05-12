@@ -31,6 +31,7 @@ import { NoticeListPage } from "../pages/Notices";
 import { DormitoryPage } from "../pages/Dormitory";
 import { RewardListPage } from "../pages/Rewards";
 import { TeacherListPage } from "../pages/Teachers";
+import { ProfilePage } from "../pages/Profile";
 
 const { Header, Sider, Content } = Layout;
 
@@ -67,6 +68,7 @@ export function AdminLayout() {
       { key: "logout", icon: <LogoutOutlined />, label: "退出登录", danger: true },
     ],
     onClick: ({ key }: { key: string }) => {
+      if (key === "profile") navigate("/profile");
       if (key === "logout") handleLogout();
     },
   };
@@ -114,6 +116,7 @@ export function AdminLayout() {
             <Route path="/notices" element={<NoticeListPage />} />
             <Route path="/dormitory" element={<DormitoryPage />} />
             <Route path="/rewards" element={<RewardListPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </Content>
       </Layout>

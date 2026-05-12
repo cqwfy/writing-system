@@ -43,6 +43,18 @@ export class DormitoryController {
     } catch (err) { next(err); }
   }
 
+  async getMyDormitory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const studentId = req.user?.studentId;
+      if (!studentId) {
+        res.status(400).json({ success: false, error: "无法获取学生信息" });
+        return;
+      }
+      const result = await dormitoryService.getMyDormitory(studentId);
+      res.json({ success: true, data: result });
+    } catch (err) { next(err); }
+  }
+
   async removeStudent(req: Request, res: Response, next: NextFunction) {
     try {
       const roomId = parseInt(req.params.roomId);

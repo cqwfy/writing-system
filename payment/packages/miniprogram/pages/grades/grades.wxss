@@ -1,0 +1,148 @@
+.container {
+  padding: 24rpx;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  margin-bottom: 16rpx;
+}
+
+.nav-back {
+  font-size: 28rpx;
+  color: #1677ff;
+  padding: 8rpx 16rpx;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 80rpx;
+}
+
+.exam-picker {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.picker-display {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+}
+
+.picker-label {
+  color: #999;
+}
+
+.picker-value {
+  color: #1677ff;
+  font-weight: bold;
+  flex: 1;
+}
+
+.picker-arrow {
+  color: #999;
+  font-size: 22rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: #999;
+}
+
+.empty {
+  text-align: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+}
+
+.empty-desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.exam-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.exam-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1677ff;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.grade-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.grade-item:last-child {
+  border-bottom: none;
+}
+
+.course-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.score-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.score {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.ranks {
+  display: flex;
+  gap: 8rpx;
+}
+
+.rank {
+  font-size: 22rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+.class-rank {
+  background: #fff2e8;
+  color: #fa8c16;
+}
+
+.grade-rank {
+  background: #e6f4ff;
+  color: #1677ff;
+}

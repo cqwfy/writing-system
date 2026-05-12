@@ -136,8 +136,9 @@ export function FeesPage() {
             <ProTable<FeeItem>
               columns={itemColumns}
               request={async (params) => {
-                const res = await api.get("/fees/items", { params: { page: params.current, pageSize: params.pageSize } });
-                return { data: res.data.data.data, total: res.data.data.total, success: true };
+                const res = await api.get("/fees/items");
+                const items = res.data.data || [];
+                return { data: items, total: items.length, success: true };
               }}
               actionRef={itemActionRef}
               rowKey="id"

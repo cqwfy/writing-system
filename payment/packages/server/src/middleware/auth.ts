@@ -11,6 +11,7 @@ export interface AuthUser {
   studentId?: number;
   parentId?: number;
   teacherId?: number;
+  openid?: string;
 }
 
 declare global {
@@ -124,7 +125,7 @@ export function ownershipMiddleware(entityType: "student" | "child") {
  */
 export function generateAccessToken(user: AuthUser): string {
   return jwt.sign(
-    { id: user.id, role: user.role, name: user.name, studentId: user.studentId, parentId: user.parentId, teacherId: user.teacherId },
+    { id: user.id, role: user.role, name: user.name, studentId: user.studentId, parentId: user.parentId, teacherId: user.teacherId, openid: user.openid },
     config.jwt.secret,
     { expiresIn: config.jwt.accessExpires as any }
   );

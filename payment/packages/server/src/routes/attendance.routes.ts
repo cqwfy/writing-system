@@ -11,6 +11,10 @@ attendanceRouter.get("/", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, n
 attendanceRouter.post("/batch", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => attendanceController.batchCreate(req, res, next));
 attendanceRouter.get("/stats", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => attendanceController.getStats(req, res, next));
 
+// 学生/家长端
+attendanceRouter.get("/my", (req, res, next) => attendanceController.getMyAttendance(req, res, next));
+attendanceRouter.get("/leave-requests/my", (req, res, next) => attendanceController.getMyLeaveRequests(req, res, next));
+
 // 请假相关
 attendanceRouter.get("/leave-requests", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => attendanceController.listLeaveRequests(req, res, next));
 attendanceRouter.post("/leave-requests", (req, res, next) => attendanceController.createLeaveRequest(req, res, next));

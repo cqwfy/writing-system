@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button, message, Modal, Tag, Space, Form, Input, Select, InputNumber, Tabs, Popconfirm } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
@@ -8,7 +8,7 @@ import api from "../services/api";
 interface Building {
   id: number;
   name: string;
-  type: string;
+  buildingType: string;
   floorCount: number;
   rooms?: RoomRecord[];
 }
@@ -30,10 +30,17 @@ export function DormitoryPage() {
   const [roomModalVisible, setRoomModalVisible] = useState(false);
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [buildings, setBuildings] = useState<{ id: number; name: string }[]>([]);
   const [buildingForm] = Form.useForm();
   const [roomForm] = Form.useForm();
   const [assignForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    api.get("/dormitories/buildings").then((res) => {
+      setBuildings((res.data.data || []).map((b: any) => ({ id: b.id, name: b.name })));
+    });
+  }, []);
 
   const handleCreateBuilding = async (values: Record<string, unknown>) => {
     setLoading(true);
@@ -67,7 +74,7 @@ export function DormitoryPage() {
 
   const buildingColumns: ProColumns<Building>[] = [
     { title: "名称", dataIndex: "name", key: "name", width: 150 },
-    { title: "类型", dataIndex: "type", key: "type", width: 80, render: (_, r) => r.type === "male" ? <Tag color="blue">男</Tag> : <Tag color="pink">女</Tag> },
+    { title: "类型", dataIndex: "buildingType", key: "buildingType", width: 80, render: (_, r) => r.buildingType === "male" ? <Tag color="blue">男</Tag> : <Tag color="pink">女</Tag> },
     { title: "楼层数", dataIndex: "floorCount", key: "floorCount", width: 80 },
   ];
 
@@ -114,9 +121,10 @@ export function DormitoryPage() {
           <div>
             <ProTable<RoomRecord>
               columns={roomColumns}
-              request={async (params) => {
-                const res = await api.get("/dormitories/rooms", { params: { page: params.current, pageSize: params.pageSize } });
-                return { data: res.data.data.data, total: res.data.data.total, success: true };
+              request={async () => {
+                const res = await api.get("/dormitories/rooms");
+                const rooms = res.data.data || [];
+                return { data: rooms, total: rooms.length, success: true };
               }}
               actionRef={roomActionRef}
               rowKey="id"
@@ -138,10 +146,10 @@ export function DormitoryPage() {
                   <Input placeholder="如 101" />
                 </Form.Item>
                 <Form.Item name="buildingId" label="宿舍楼" rules={[{ required: true }]}>
-                  <Select placeholder="选择宿舍楼" options={[]} />
+                  <Select placeholder="选择宿舍楼" options={buildings.map((b) => ({ label: b.name, value: b.id }))} />
                 </Form.Item>
                 <Form.Item name="capacity" label="容量" rules={[{ required: true }]}>
-                  <InputNumber min={1} max={10} style={{ width: "100%" }} />
+                  <Select placeholder="选择容量" options={[1,2,3,4,5,6,7,8].map((n) => ({ label: `${n}人间`, value: n }))} />
                 </Form.Item>
               </Form>
             </Modal>
@@ -177,9 +185,10 @@ export function DormitoryPage() {
           <div>
             <ProTable<Building>
               columns={buildingColumns}
-              request={async (params) => {
-                const res = await api.get("/dormitories/buildings", { params: { page: params.current, pageSize: params.pageSize } });
-                return { data: res.data.data, total: res.data.total, success: true };
+              request={async () => {
+                const res = await api.get("/dormitories/buildings");
+                const buildings = res.data.data || [];
+                return { data: buildings, total: buildings.length, success: true };
               }}
               actionRef={buildingActionRef}
               rowKey="id"
@@ -201,7 +210,7 @@ export function DormitoryPage() {
                   <Input placeholder="如 男生宿舍楼A" />
                 </Form.Item>
                 <Space style={{ display: "flex", gap: 16 }}>
-                  <Form.Item name="type" label="类型" rules={[{ required: true }]} style={{ width: 160 }}>
+                  <Form.Item name="buildingType" label="类型" rules={[{ required: true }]} style={{ width: 160 }}>
                     <Select options={[{ label: "男生宿舍", value: "male" }, { label: "女生宿舍", value: "female" }]} />
                   </Form.Item>
                   <Form.Item name="floorCount" label="楼层数" rules={[{ required: true }]} style={{ width: 160 }}>

@@ -72,10 +72,11 @@ export const createTimetableSchema = z.object({
 // ============ 考试 ============
 export const createExamSchema = z.object({
   name: z.string().min(1).max(50),
-  semester: z.nativeEnum(Semester),
+  semester: z.nativeEnum(Semester).optional(),
   academicYear: z.string().length(9),
   examDate: z.string().optional(),
   weight: z.number().min(0).max(10).optional(),
+  month: z.number().int().min(1).max(12).optional(),
 });
 
 // ============ 成绩 ============

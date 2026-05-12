@@ -114,6 +114,26 @@ export class AttendanceService {
   }
 
   /**
+   * 我的考勤记录（学生/家长端）
+   */
+  async getMyAttendance(studentId: number, params?: { page?: number; pageSize?: number }) {
+    const { page = 1, pageSize = 20 } = params || {};
+    const where: Prisma.AttendanceWhereInput = { studentId };
+
+    const [data, total] = await Promise.all([
+      prisma.attendance.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { recordDate: "desc" },
+      }),
+      prisma.attendance.count({ where }),
+    ]);
+
+    return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+  }
+
+  /**
    * 请假申请（学生/家长端）
    */
   async createLeaveRequest(data: { studentId: number; startDate: string; endDate: string; leaveType: string; reason: string }) {
@@ -152,6 +172,16 @@ export class AttendanceService {
     ]);
 
     return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+  }
+
+  /**
+   * 我的请假申请（学生/家长端）
+   */
+  async getMyLeaveRequests(studentId: number) {
+    return prisma.leaveRequest.findMany({
+      where: { studentId },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
   /**

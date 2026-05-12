@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">← 返回</view>
+    <view class="nav-title">通知公告</view>
+  </view>
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:if="{{notices.length === 0 && !loading}}" class="empty">
+    <view class="empty-icon">📢</view>
+    <view class="empty-text">暂无通知公告</view>
+  </view>
+
+  <view class="notice-list">
+    <view class="notice-item" wx:for="{{notices}}" wx:key="id" wx:for-item="n" data-id="{{n.id}}" bindtap="viewDetail">
+      <view class="notice-header">
+        <view class="notice-title">
+          <text wx:if="{{n.isPinned}}" class="pinned-tag">置顶</text>
+          {{n.title}}
+        </view>
+        <view class="notice-date">{{n.publishedAt}}</view>
+      </view>
+      <view class="notice-preview">{{n.content}}</view>
+      <view class="notice-footer">
+        <view class="notice-category">{{n.category}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 通知详情弹窗 -->
+  <view wx:if="{{showDetail && currentNotice}}" class="detail-mask" bindtap="closeDetail">
+    <view class="detail-card" catchtap="">
+      <view class="detail-title">{{currentNotice.title}}</view>
+      <view class="detail-meta">
+        <text>{{currentNotice.publishedAt}}</text>
+        <text class="detail-category">{{currentNotice.category}}</text>
+      </view>
+      <view class="detail-content">{{currentNotice.content}}</view>
+      <button class="close-btn" bindtap="closeDetail">关闭</button>
+    </view>
+  </view>
+</view>

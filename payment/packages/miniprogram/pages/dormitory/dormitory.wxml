@@ -1,0 +1,28 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:if="{{!info && !loading}}" class="empty">
+    <view class="empty-icon">🏠</view>
+    <view class="empty-text">暂未分配宿舍</view>
+  </view>
+
+  <view wx:if="{{info}}" class="dorm-card">
+    <view class="card-title">宿舍信息</view>
+    <view class="info-row">
+      <text class="info-label">宿舍楼</text>
+      <text class="info-value">{{buildingName}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">楼型</text>
+      <text class="info-value">{{buildingType}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">房间号</text>
+      <text class="info-value">{{info.roomNumber || '-'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">容量</text>
+      <text class="info-value">{{info.occupied || 0}} / {{info.capacity || 0}} 人</text>
+    </view>
+  </view>
+</view>

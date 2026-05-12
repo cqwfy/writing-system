@@ -1,0 +1,181 @@
+.container {
+  padding: 0;
+}
+
+.tab-bar {
+  display: flex;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  border-bottom: 4rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-item.active {
+  color: #1677ff;
+  border-bottom-color: #1677ff;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 120rpx 0;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 考勤记录 */
+.record-list {
+  padding: 24rpx;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 28rpx 32rpx;
+  border-radius: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.record-date {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.record-period {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.record-status {
+  font-size: 26rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.record-status.present { background: #f6ffed; color: #52c41a; }
+.record-status.absent { background: #fff2f0; color: #ff4d4f; }
+.record-status.late { background: #fff7e6; color: #fa8c16; }
+.record-status.early_leave { background: #fffbe6; color: #fadb14; }
+.record-status.sick_leave { background: #e6f4ff; color: #1677ff; }
+.record-status.personal_leave { background: #f9f0ff; color: #722ed1; }
+
+/* 请假表单 */
+.form-card {
+  margin: 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+}
+
+.form-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 32rpx;
+}
+
+.form-item {
+  margin-bottom: 28rpx;
+}
+
+.form-label {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.form-row {
+  display: flex;
+}
+
+.picker-value {
+  font-size: 30rpx;
+  color: #333;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #e8e8e8;
+}
+
+.textarea {
+  width: 100%;
+  height: 160rpx;
+  border: 1rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.submit-btn {
+  margin-top: 16rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 12rpx;
+}
+
+/* 历史申请 */
+.leave-history {
+  padding: 0 24rpx 24rpx;
+}
+
+.history-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.leave-item {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx 32rpx;
+  margin-bottom: 12rpx;
+}
+
+.leave-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.leave-type {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.leave-status {
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+}
+
+.leave-status.pending { background: #fff7e6; color: #fa8c16; }
+.leave-status.approved { background: #f6ffed; color: #52c41a; }
+.leave-status.rejected { background: #fff2f0; color: #ff4d4f; }
+
+.leave-dates {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.leave-reason {
+  font-size: 26rpx;
+  color: #666;
+}

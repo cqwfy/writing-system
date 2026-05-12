@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { Role } from "@sms/shared";
 import { AppError } from "../middleware/error-handler";
@@ -46,7 +47,7 @@ export class AuthService {
     }
 
     // 新用户，返回临时 token 用于后续绑定
-    const tempToken = generateAccessToken({ id: 0, role: Role.STUDENT, name: "" });
+    const tempToken = generateAccessToken({ id: 0, role: Role.STUDENT, name: "", openid });
     return { isNewUser: true, tempToken };
   }
 
@@ -54,6 +55,15 @@ export class AuthService {
    * 绑定微信用户
    */
   async bindWechatUser(tempToken: string, bindType: string, bindValue: string) {
+    // 从临时 token 中解析 openid
+    let openid: string;
+    try {
+      const payload = jwt.verify(tempToken, config.jwt.secret) as { openid?: string };
+      openid = payload.openid || "";
+    } catch {
+      throw new AppError(401, "临时凭证已过期");
+    }
+
     let user;
     if (bindType === "student_no") {
       const student = await prisma.student.findFirst({ where: { studentNo: bindValue, deletedAt: null } });
@@ -71,6 +81,11 @@ export class AuthService {
 
     if (!user) throw new AppError(404, "用户不存在");
 
+    // 保存微信 openid 到用户记录，下次登录可直接识别
+    if (openid) {
+      await prisma.user.update({ where: { id: user.id }, data: { wechatOpenid: openid } });
+    }
+
     return this.buildLoginResponse(user);
   }
 
@@ -78,7 +93,6 @@ export class AuthService {
    * 刷新 token
    */
   async refreshToken(refreshToken: string) {
-    const jwt = await import("jsonwebtoken");
     try {
       const payload = jwt.verify(refreshToken, config.jwt.refreshSecret) as { id: number; role: Role };
       const user = await prisma.user.findUnique({ where: { id: payload.id } });
@@ -141,7 +155,7 @@ export class AuthService {
       id: fullUser.id,
       role: fullUser.role as Role,
       name: fullUser.name,
-      studentId: fullUser.student?.id,
+      studentId: fullUser.student?.id || fullUser.parent?.studentId,
       parentId: fullUser.parent?.id,
       teacherId: fullUser.teacher?.id,
     };

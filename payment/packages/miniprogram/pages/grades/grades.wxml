@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">← 返回</view>
+    <view class="nav-title">成绩查询</view>
+  </view>
+
+  <!-- 考试选择器 -->
+  <view class="exam-picker" wx:if="{{examNames.length > 0}}">
+    <picker mode="selector" range="{{examNames}}" value="{{examIndex}}" bindchange="onExamChange">
+      <view class="picker-display">
+        <text class="picker-label">选择考试：</text>
+        <text class="picker-value">{{examNames[examIndex]}}</text>
+        <text class="picker-arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:if="{{currentGrades.length === 0 && !loading}}" class="empty">
+    <view class="empty-icon">📊</view>
+    <view class="empty-text">暂无成绩数据</view>
+    <view class="empty-desc">等待教师录入并发布成绩</view>
+  </view>
+
+  <view wx:if="{{currentGrades.length > 0}}" class="exam-card">
+    <view class="exam-title">{{examNames[examIndex]}}</view>
+    <view class="grade-list">
+      <view class="grade-item" wx:for="{{currentGrades}}" wx:key="id" wx:for-item="g">
+        <view class="course-name">{{g.courseName || '-'}}</view>
+        <view class="score-info">
+          <view class="score">{{g.score}}</view>
+          <view class="ranks">
+            <text wx:if="{{g.classRank}}" class="rank class-rank">班排{{g.classRank}}</text>
+            <text wx:if="{{g.gradeRank}}" class="rank grade-rank">级排{{g.gradeRank}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

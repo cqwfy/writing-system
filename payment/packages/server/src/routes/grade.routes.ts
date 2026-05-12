@@ -10,6 +10,7 @@ gradeRouter.use(authMiddleware);
 // 考试管理
 gradeRouter.get("/exams", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => gradeController.listExams(req, res, next));
 gradeRouter.post("/exams", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => gradeController.createExam(req, res, next));
+gradeRouter.delete("/exams/:id", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => gradeController.deleteExam(req, res, next));
 
 // 成绩管理
 gradeRouter.get("/", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => gradeController.list(req, res, next));

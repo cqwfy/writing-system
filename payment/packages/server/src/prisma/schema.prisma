@@ -170,14 +170,15 @@ model Timetable {
 model ExamType {
   id           Int      @id @default(autoincrement())
   name         String   @db.VarChar(50)
-  semester     String   @db.VarChar(10)
+  semester     String?  @db.VarChar(10)
   academicYear String   @db.VarChar(9)
   examDate     DateTime?
   weight       Decimal? @db.Decimal(3, 2)
+  month        Int?
 
   grades Grade[]
 
-  @@unique([name, semester, academicYear])
+  @@unique([name, academicYear, semester, month])
   @@map("exam_types")
 }
 

@@ -19,6 +19,13 @@ export class GradeController {
     } catch (err) { next(err); }
   }
 
+  async deleteExam(req: Request, res: Response, next: NextFunction) {
+    try {
+      await gradeService.deleteExam(parseInt(req.params.id));
+      res.json({ success: true, message: "删除成功" });
+    } catch (err) { next(err); }
+  }
+
   async batchCreate(req: Request, res: Response, next: NextFunction) {
     try {
       const data = batchGradeSchema.parse(req.body);

@@ -1,0 +1,82 @@
+<view class="container">
+  <!-- 切换标签 -->
+  <view class="tab-bar">
+    <view class="tab-item {{tab === 'records' ? 'active' : ''}}" data-tab="records" bindtap="switchTab">
+      考勤记录
+    </view>
+    <view class="tab-item {{tab === 'leave' ? 'active' : ''}}" data-tab="leave" bindtap="switchTab">
+      请假申请
+    </view>
+  </view>
+
+  <!-- 考勤记录 -->
+  <view wx:if="{{tab === 'records'}}">
+    <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+    <view wx:if="{{records.length === 0 && !loading}}" class="empty">
+      <view class="empty-icon">📋</view>
+      <view class="empty-text">暂无考勤记录</view>
+    </view>
+
+    <view class="record-list" wx:for="{{records}}" wx:key="id" wx:for-item="r">
+      <view class="record-item">
+        <view class="record-left">
+          <view class="record-date">{{r.recordDate}}</view>
+          <view class="record-period">{{r.period === 'morning' ? '上午' : r.period === 'afternoon' ? '下午' : '全天'}}</view>
+        </view>
+        <view class="record-status {{r.status}}">{{r.status === 'present' ? '出勤' : r.status === 'absent' ? '缺勤' : r.status === 'late' ? '迟到' : r.status === 'early_leave' ? '早退' : r.status === 'sick_leave' ? '病假' : r.status === 'personal_leave' ? '事假' : r.status}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 请假申请 -->
+  <view wx:if="{{tab === 'leave'}}">
+    <view class="form-card">
+      <view class="form-title">新建请假申请</view>
+
+      <view class="form-item">
+        <view class="form-label">请假类型</view>
+        <picker mode="selector" range="{{['病假', '事假']}}" value="{{leaveType === 'sick' ? 0 : 1}}" bindchange="onLeaveTypeChange">
+          <view class="picker-value">{{leaveType === 'sick' ? '病假' : '事假'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-row">
+        <view class="form-item" style="flex:1; margin-right: 20rpx;">
+          <view class="form-label">开始日期</view>
+          <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+            <view class="picker-value">{{startDate || '请选择'}}</view>
+          </picker>
+        </view>
+        <view class="form-item" style="flex:1;">
+          <view class="form-label">结束日期</view>
+          <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+            <view class="picker-value">{{endDate || '请选择'}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">请假原因</view>
+        <textarea class="textarea" placeholder="请输入请假原因" value="{{reason}}" bindinput="onReasonInput" maxlength="200" />
+      </view>
+
+      <button class="submit-btn" type="primary" loading="{{submitting}}" bindtap="submitLeave">
+        提交申请
+      </button>
+    </view>
+
+    <!-- 历史申请 -->
+    <view wx:if="{{leaveList.length > 0}}" class="leave-history">
+      <view class="history-title">历史申请</view>
+      <view class="leave-item" wx:for="{{leaveList}}" wx:key="id" wx:for-item="l">
+        <view class="leave-header">
+          <view class="leave-type">{{l.leaveType === 'sick' ? '病假' : '事假'}}</view>
+          <view class="leave-status {{l.status}}">{{l.status === 'pending' ? '待审批' : l.status === 'approved' ? '已批准' : '已拒绝'}}</view>
+        </view>
+        <view class="leave-dates">{{l.startDate}} ~ {{l.endDate}}</view>
+        <view class="leave-reason">{{l.reason}}</view>
+      </view>
+    </view>
+  </view>
+</view>

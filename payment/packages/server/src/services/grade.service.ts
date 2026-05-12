@@ -14,16 +14,25 @@ export class GradeService {
     });
   }
 
-  async createExam(data: { name: string; semester: string; academicYear: string; examDate?: string; weight?: number }) {
+  async createExam(data: { name: string; semester?: string; academicYear: string; examDate?: string; weight?: number; month?: number }) {
+    if (data.name === "月考" && !data.month) throw new AppError(400, "月考必须选择月份");
+    if (data.name !== "月考" && !data.semester) throw new AppError(400, "期中/期末考试必须选择学期");
     return prisma.examType.create({
       data: {
         name: data.name,
-        semester: data.semester,
+        semester: data.semester || null,
         academicYear: data.academicYear,
         examDate: data.examDate ? new Date(data.examDate) : undefined,
         weight: data.weight,
+        month: data.month || null,
       },
     });
+  }
+
+  async deleteExam(id: number) {
+    // 先删成绩再删考试
+    await prisma.grade.deleteMany({ where: { examTypeId: id } });
+    await prisma.examType.delete({ where: { id } });
   }
 
   /**
@@ -88,7 +97,7 @@ export class GradeService {
         },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: [{ score: "desc" }, { student: { name: "asc" } }],
+        orderBy: [{ student: { class: { name: "asc" } } }, { course: { name: "asc" } }, { score: "desc" }],
       }),
       prisma.grade.count({ where }),
     ]);

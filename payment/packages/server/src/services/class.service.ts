@@ -10,7 +10,7 @@ export class ClassService {
     if (gradeLevel) where.gradeLevel = gradeLevel;
     if (academicYear) where.academicYear = academicYear;
 
-    const [data, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       prisma.class.findMany({
         where,
         include: { homeroomTeacher: { select: { id: true, name: true } } },
@@ -20,6 +20,21 @@ export class ClassService {
       }),
       prisma.class.count({ where }),
     ]);
+
+    // 统计每个班级的实际学生数（排除软删除）
+    const classIds = rows.map((r) => r.id);
+    const counts = await prisma.student.groupBy({
+      by: ["classId"],
+      where: { classId: { in: classIds }, deletedAt: null },
+      _count: { id: true },
+    });
+    const countMap: Record<number, number> = {};
+    counts.forEach((c) => { countMap[c.classId] = c._count.id; });
+
+    const data = rows.map((r) => ({
+      ...r,
+      studentCount: countMap[r.id] || 0,
+    }));
 
     return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
   }

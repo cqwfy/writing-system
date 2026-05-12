@@ -37,11 +37,39 @@ export class AttendanceController {
     } catch (err) { next(err); }
   }
 
+  async getMyAttendance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const studentId = req.user?.studentId;
+      if (!studentId) {
+        res.status(400).json({ success: false, error: "无法获取学生信息" });
+        return;
+      }
+      const { page, pageSize } = req.query;
+      const result = await attendanceService.getMyAttendance(studentId, {
+        page: page ? parseInt(page as string) : 1,
+        pageSize: pageSize ? parseInt(pageSize as string) : 20,
+      });
+      res.json({ success: true, data: result });
+    } catch (err) { next(err); }
+  }
+
   async createLeaveRequest(req: Request, res: Response, next: NextFunction) {
     try {
       const data = createLeaveRequestSchema.parse(req.body);
       const result = await attendanceService.createLeaveRequest(data);
       res.status(201).json({ success: true, data: result });
+    } catch (err) { next(err); }
+  }
+
+  async getMyLeaveRequests(req: Request, res: Response, next: NextFunction) {
+    try {
+      const studentId = req.user?.studentId;
+      if (!studentId) {
+        res.status(400).json({ success: false, error: "无法获取学生信息" });
+        return;
+      }
+      const result = await attendanceService.getMyLeaveRequests(studentId);
+      res.json({ success: true, data: result });
     } catch (err) { next(err); }
   }
 
