@@ -12,3 +12,5 @@ authRouter.post("/refresh", (req, res, next) => authController.refresh(req, res,
 
 // 当前用户信息（需登录）
 authRouter.get("/me", authMiddleware, (req, res, next) => authController.me(req, res, next));
+// 修改密码（需登录）
+authRouter.post("/change-password", authMiddleware, (req, res, next) => authController.changePassword(req, res, next));

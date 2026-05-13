@@ -57,9 +57,9 @@ export function ClassListPage() {
       key: "gradeLevel",
       width: 80,
       valueType: "select",
-      valueEnum: { "7": "七年级", "8": "八年级", "9": "九年级" },
+      valueEnum: { "7": "七年级", "8": "八年级", "9": "九年级", "10": "高一", "11": "高二", "12": "高三" },
       render: (_, r) => {
-        const m: Record<string, string> = { "7": "七年级", "8": "八年级", "9": "九年级" };
+        const m: Record<string, string> = { "7": "七年级", "8": "八年级", "9": "九年级", "10": "高一", "11": "高二", "12": "高三" };
         return m[r.gradeLevel] || r.gradeLevel;
       },
     },
@@ -135,7 +135,7 @@ export function ClassListPage() {
             <Input placeholder="如 七年级(1)班" />
           </Form.Item>
           <Form.Item name="gradeLevel" label="年级" rules={[{ required: true }]}>
-            <Select options={[{ label: "七年级", value: "7" }, { label: "八年级", value: "8" }, { label: "九年级", value: "9" }]} />
+            <Select options={[{ label: "七年级", value: "7" }, { label: "八年级", value: "8" }, { label: "九年级", value: "9" }, { label: "高一", value: "10" }, { label: "高二", value: "11" }, { label: "高三", value: "12" }]} />
           </Form.Item>
           <Form.Item name="homeroomTeacherId" label="班主任">
             <Select allowClear placeholder="选择班主任" options={teachers.map((t) => ({ label: `${t.name}（${t.subject}）`, value: t.id }))} />

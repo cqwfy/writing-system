@@ -8,7 +8,7 @@ export class TimetableService {
     return prisma.timetable.findMany({
       where: { classId, semester, academicYear },
       include: {
-        course: { select: { id: true, name: true, code: true } },
+        course: { select: { id: true, name: true, code: true, teacher: { select: { id: true, name: true } } } },
         class: { select: { id: true, name: true } },
       },
       orderBy: [{ dayOfWeek: "asc" }, { period: "asc" }],

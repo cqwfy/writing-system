@@ -20,12 +20,13 @@
     "selectedColor": "#1677ff",
     "backgroundColor": "#fff",
     "list": [
-      { "pagePath": "pages/index/index", "text": "首页", "iconPath": "" },
-      { "pagePath": "pages/grades/grades", "text": "成绩", "iconPath": "" },
-      { "pagePath": "pages/notices/notices", "text": "通知", "iconPath": "" },
-      { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "" }
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/grades/grades", "text": "成绩" },
+      { "pagePath": "pages/notices/notices", "text": "通知" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },
   "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json"
 }

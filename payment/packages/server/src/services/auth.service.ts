@@ -170,6 +170,24 @@ export class AuthService {
     };
   }
 
+  /**
+   * 修改密码
+   */
+  async changePassword(userId: number, oldPassword: string, newPassword: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.passwordHash) {
+      throw new AppError(404, "用户不存在");
+    }
+
+    const valid = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!valid) {
+      throw new AppError(400, "旧密码错误");
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash: newHash } });
+  }
+
   private async getWechatOpenid(code: string): Promise<string> {
     const { appId, appSecret } = config.wechat;
     if (!appId || !appSecret) {

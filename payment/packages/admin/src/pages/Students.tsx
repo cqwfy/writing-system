@@ -95,8 +95,9 @@ export function StudentListPage() {
     }
   };
 
+  const gradeStatusMap: Record<string, string> = { "7": "Default", "8": "Processing", "9": "Warning", "10": "Error", "11": "Success", "12": undefined as any };
   const classValueEnum = Object.fromEntries(
-    classes.map((c) => [String(c.id), { text: c.name, status: c.gradeLevel === "7" ? "Default" : c.gradeLevel === "8" ? "Processing" : "Warning" }])
+    classes.map((c) => [String(c.id), { text: c.name, status: gradeStatusMap[c.gradeLevel] || "Default" }])
   );
 
   const columns: ProColumns<StudentRecord>[] = [

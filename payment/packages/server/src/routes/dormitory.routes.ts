@@ -15,4 +15,5 @@ dormitoryRouter.post("/rooms", rbacMiddleware(Role.ADMIN), (req, res, next) => d
 dormitoryRouter.get("/my", (req, res, next) => dormitoryController.getMyDormitory(req, res, next));
 
 dormitoryRouter.put("/rooms/:roomId/assign", rbacMiddleware(Role.ADMIN), (req, res, next) => dormitoryController.assignStudent(req, res, next));
+dormitoryRouter.put("/rooms/:roomId/assign-batch", rbacMiddleware(Role.ADMIN), (req, res, next) => dormitoryController.assignStudents(req, res, next));
 dormitoryRouter.put("/rooms/:roomId/remove", rbacMiddleware(Role.ADMIN), (req, res, next) => dormitoryController.removeStudent(req, res, next));

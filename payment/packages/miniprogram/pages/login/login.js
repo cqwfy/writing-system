@@ -39,12 +39,12 @@ Page({
             wx.switchTab({ url: "/pages/index/index" });
           }
         } catch (err) {
-          wx.showToast({ title: err.message || "登录失败", icon: "none" });
+          wx.showToast({ title: err.message || err.errMsg || "登录失败", icon: "none", duration: 3000 });
           this.setData({ isLoading: false });
         }
       },
-      fail: () => {
-        wx.showToast({ title: "微信登录失败", icon: "none" });
+      fail: (err) => {
+        wx.showToast({ title: "wx.login失败: " + (err.errMsg || "未知"), icon: "none", duration: 3000 });
         this.setData({ isLoading: false });
       },
     });

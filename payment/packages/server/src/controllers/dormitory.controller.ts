@@ -1,6 +1,19 @@
 import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
 import { dormitoryService } from "../services/dormitory.service";
 import { createBuildingSchema, createRoomSchema } from "@sms/shared";
+
+const assignStudentSchema = z.object({
+  studentId: z.coerce.number().int(),
+});
+
+const assignStudentsSchema = z.object({
+  studentIds: z.array(z.coerce.number().int()).min(1, "至少选择一个学生"),
+});
+
+const removeStudentSchema = z.object({
+  studentId: z.coerce.number().int(),
+});
 
 export class DormitoryController {
   async listBuildings(req: Request, res: Response, next: NextFunction) {
@@ -37,9 +50,18 @@ export class DormitoryController {
   async assignStudent(req: Request, res: Response, next: NextFunction) {
     try {
       const roomId = parseInt(req.params.roomId);
-      const { studentId } = req.body;
+      const { studentId } = assignStudentSchema.parse(req.body);
       await dormitoryService.assignStudent(roomId, studentId);
       res.json({ success: true, message: "分配成功" });
+    } catch (err) { next(err); }
+  }
+
+  async assignStudents(req: Request, res: Response, next: NextFunction) {
+    try {
+      const roomId = parseInt(req.params.roomId);
+      const { studentIds } = assignStudentsSchema.parse(req.body);
+      const result = await dormitoryService.assignStudents(roomId, studentIds);
+      res.json({ success: true, data: result });
     } catch (err) { next(err); }
   }
 
@@ -58,7 +80,7 @@ export class DormitoryController {
   async removeStudent(req: Request, res: Response, next: NextFunction) {
     try {
       const roomId = parseInt(req.params.roomId);
-      const { studentId } = req.body;
+      const { studentId } = removeStudentSchema.parse(req.body);
       await dormitoryService.removeStudent(roomId, studentId);
       res.json({ success: true, message: "移除成功" });
     } catch (err) { next(err); }

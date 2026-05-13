@@ -3,6 +3,8 @@ import { Card, Col, Row, Statistic, Table, Typography, Spin } from "antd";
 import { TeamOutlined, UserOutlined, BookOutlined, BankOutlined } from "@ant-design/icons";
 import api from "../services/api";
 
+const gradeLabels: Record<string, string> = { "7": "七年级", "8": "八年级", "9": "九年级", "10": "高一", "11": "高二", "12": "高三" };
+
 export function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -16,8 +18,8 @@ export function DashboardPage() {
     try {
       const res = await api.get("/dashboard/stats");
       setStats(res.data.data);
-    } catch {
-      // ignore
+    } catch (err: any) {
+      console.error("Dashboard 加载失败:", err);
     } finally {
       setLoading(false);
     }
@@ -57,7 +59,7 @@ export function DashboardPage() {
                   <Col span={8} key={g.gradeLevel}>
                     <Card size="small">
                       <Statistic
-                        title={`${g.gradeLevel === "7" ? "七年级" : g.gradeLevel === "8" ? "八年级" : g.gradeLevel === "9" ? "九年级" : g.gradeLevel + "年级"}`}
+                        title={`${gradeLabels[g.gradeLevel] || g.gradeLevel + "年级"}`}
                         value={g.count}
                         suffix="人"
                       />

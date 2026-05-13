@@ -23,7 +23,19 @@ export enum GradeLevel {
   SEVEN = "7",
   EIGHT = "8",
   NINE = "9",
+  TEN = "10",
+  ELEVEN = "11",
+  TWELVE = "12",
 }
+
+export const GRADE_LABELS: Record<string, string> = {
+  "7": "七年级",
+  "8": "八年级",
+  "9": "九年级",
+  "10": "高一",
+  "11": "高二",
+  "12": "高三",
+};
 
 // ============ 学期 ============
 export enum Semester {

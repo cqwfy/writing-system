@@ -58,7 +58,7 @@ export function FeesPage() {
     },
     {
       title: "年级", dataIndex: "gradeLevel", key: "gradeLevel", width: 100,
-      render: (_, r) => ({ "7": "七年级", "8": "八年级", "9": "九年级" })[r.gradeLevel] || r.gradeLevel,
+      render: (_, r) => ({ "7": "七年级", "8": "八年级", "9": "九年级", "10": "高一", "11": "高二", "12": "高三" })[r.gradeLevel] || r.gradeLevel,
     },
     { title: "学期", dataIndex: "semester", key: "semester", width: 80, render: (_, r) => r.semester === "first" ? "上学期" : "下学期" },
     { title: "学年", dataIndex: "academicYear", key: "academicYear", width: 120 },
@@ -170,7 +170,7 @@ export function FeesPage() {
                     ]} />
                   </Form.Item>
                   <Form.Item name="gradeLevel" label="年级" rules={[{ required: true }]} style={{ width: 160 }}>
-                    <Select options={[{ label: "七年级", value: "7" }, { label: "八年级", value: "8" }, { label: "九年级", value: "9" }]} />
+                    <Select options={[{ label: "七年级", value: "7" }, { label: "八年级", value: "8" }, { label: "九年级", value: "9" }, { label: "高一", value: "10" }, { label: "高二", value: "11" }, { label: "高三", value: "12" }]} />
                   </Form.Item>
                 </Space>
                 <Space style={{ display: "flex", gap: 16 }}>

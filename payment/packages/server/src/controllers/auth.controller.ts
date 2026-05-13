@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { authService } from "../services/auth.service";
 import { loginSchema, wechatLoginSchema, bindUserSchema } from "@sms/shared";
+import { z } from "zod";
+
+const changePasswordSchema = z.object({
+  oldPassword: z.string().min(1, "请输入旧密码"),
+  newPassword: z.string().min(6, "新密码至少 6 位").max(50),
+});
 
 export class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
@@ -42,6 +48,20 @@ export class AuthController {
       }
       const result = await authService.refreshToken(refreshToken);
       res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        res.status(401).json({ success: false, error: "未登录" });
+        return;
+      }
+      const { oldPassword, newPassword } = changePasswordSchema.parse(req.body);
+      await authService.changePassword(req.user.id, oldPassword, newPassword);
+      res.json({ success: true, message: "密码修改成功" });
     } catch (err) {
       next(err);
     }

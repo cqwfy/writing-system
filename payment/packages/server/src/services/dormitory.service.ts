@@ -35,6 +35,7 @@ export class DormitoryService {
 
     const student = await prisma.student.findFirst({ where: { id: studentId, deletedAt: null } });
     if (!student) throw new AppError(404, "学生不存在");
+    if (student.dormitoryId) throw new AppError(400, "该学生已分配宿舍");
 
     await prisma.$transaction([
       prisma.student.update({
@@ -46,6 +47,33 @@ export class DormitoryService {
         data: { occupied: { increment: 1 } },
       }),
     ]);
+  }
+
+  async assignStudents(roomId: number, studentIds: number[]) {
+    if (!studentIds || studentIds.length === 0) throw new AppError(400, "请选择至少一名学生");
+    const room = await prisma.dormitoryRoom.findUnique({ where: { id: roomId } });
+    if (!room) throw new AppError(404, "宿舍房间不存在");
+    if (room.occupied + studentIds.length > room.capacity) throw new AppError(400, `房间容量不足，剩余 ${room.capacity - room.occupied} 个床位`);
+
+    const students = await prisma.student.findMany({
+      where: { id: { in: studentIds }, deletedAt: null },
+    });
+    if (students.length !== studentIds.length) throw new AppError(404, "部分学生不存在");
+    const alreadyAssigned = students.find((s) => s.dormitoryId);
+    if (alreadyAssigned) throw new AppError(400, `学生 ${alreadyAssigned.name} 已分配宿舍`);
+
+    await prisma.$transaction([
+      prisma.student.updateMany({
+        where: { id: { in: studentIds } },
+        data: { dormitoryId: roomId },
+      }),
+      prisma.dormitoryRoom.update({
+        where: { id: roomId },
+        data: { occupied: { increment: studentIds.length } },
+      }),
+    ]);
+
+    return { assigned: studentIds.length };
   }
 
   async removeStudent(roomId: number, studentId: number) {

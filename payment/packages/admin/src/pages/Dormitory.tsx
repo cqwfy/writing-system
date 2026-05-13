@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { Button, message, Modal, Tag, Space, Form, Input, Select, InputNumber, Tabs, Popconfirm } from "antd";
+import { Button, message, Modal, Tag, Space, Form, Input, Select, Tabs, Popconfirm } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
@@ -31,16 +31,27 @@ export function DormitoryPage() {
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [buildings, setBuildings] = useState<{ id: number; name: string }[]>([]);
+  const [classes, setClasses] = useState<{ id: number; name: string }[]>([]);
+  const [studentsByClass, setStudentsByClass] = useState<Record<number, { id: number; name: string; studentNo: string }[]>>({});
   const [buildingForm] = Form.useForm();
   const [roomForm] = Form.useForm();
   const [assignForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  const watchedStudents: Array<{ classId?: number }> = Form.useWatch("students", assignForm) || [];
+
   useEffect(() => {
     api.get("/dormitories/buildings").then((res) => {
       setBuildings((res.data.data || []).map((b: any) => ({ id: b.id, name: b.name })));
     });
+    api.get("/classes/all").then((res) => setClasses(res.data.data || []));
   }, []);
+
+  const loadStudentsForClass = async (classId: number) => {
+    if (studentsByClass[classId]) return;
+    const res = await api.get(`/classes/${classId}/students`);
+    setStudentsByClass((prev) => ({ ...prev, [classId]: res.data.data || [] }));
+  };
 
   const handleCreateBuilding = async (values: Record<string, unknown>) => {
     setLoading(true);
@@ -67,6 +78,30 @@ export function DormitoryPage() {
       roomActionRef.current?.reload();
     } catch (err: any) {
       message.error(err.response?.data?.error || "创建失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAssignStudents = async (values: Record<string, unknown>) => {
+    if (!selectedRoomId) {
+      message.error("请先选择房间");
+      return;
+    }
+    setLoading(true);
+    try {
+      const students = (values as any).students || [];
+      const studentIds = students.map((s: any) => s.studentId).filter((id: any) => id != null);
+      if (studentIds.length === 0) {
+        message.warning("请选择至少一名学生");
+        return;
+      }
+      await api.put(`/dormitories/rooms/${selectedRoomId}/assign-batch`, { studentIds });
+      message.success(`成功分配 ${studentIds.length} 名学生`);
+      setAssignModalVisible(false);
+      roomActionRef.current?.reload();
+    } catch (err: any) {
+      message.error(err.response?.data?.error || "分配失败");
     } finally {
       setLoading(false);
     }
@@ -156,23 +191,48 @@ export function DormitoryPage() {
             <Modal title="分配学生" open={assignModalVisible}
               onCancel={() => setAssignModalVisible(false)}
               onOk={() => assignForm.submit()} confirmLoading={loading}
+              width={560}
             >
-              <Form form={assignForm} layout="vertical" onFinish={async (values) => {
-                setLoading(true);
-                try {
-                  await api.put(`/dormitories/rooms/${selectedRoomId}/assign`, values);
-                  message.success("分配成功");
-                  setAssignModalVisible(false);
-                  roomActionRef.current?.reload();
-                } catch (err: any) {
-                  message.error(err.response?.data?.error || "分配失败");
-                } finally {
-                  setLoading(false);
-                }
-              }}>
-                <Form.Item name="studentId" label="学生ID" rules={[{ required: true }]}>
-                  <Input placeholder="输入学生ID" />
-                </Form.Item>
+              <Form form={assignForm} layout="vertical" onFinish={handleAssignStudents}>
+                <Form.List name="students">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...rest }) => {
+                        const rowValue = watchedStudents?.[name];
+                        const studentOptions = (rowValue?.classId && studentsByClass[rowValue.classId] || []).map(
+                          (s: { id: number; name: string; studentNo: string }) => ({ label: `${s.name} (${s.studentNo})`, value: s.id })
+                        );
+                        return (
+                            <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
+                              <Form.Item {...rest} name={[name, "classId"]} rules={[{ required: true }]} style={{ width: 180 }}>
+                                <Select
+                                  placeholder="选择班级"
+                                  options={classes.map((c) => ({ label: c.name, value: c.id }))}
+                                  onChange={(classId) => {
+                                    loadStudentsForClass(classId);
+                                    assignForm.setFieldValue(["students", name, "studentId"], undefined);
+                                  }}
+                                />
+                              </Form.Item>
+                              <Form.Item {...rest} name={[name, "studentId"]} rules={[{ required: true }]} style={{ width: 190 }}>
+                                <Select
+                                  placeholder="选择学生"
+                                  showSearch
+                                  optionFilterProp="label"
+                                  disabled={!rowValue?.classId}
+                                  options={studentOptions}
+                                />
+                              </Form.Item>
+                              <Button type="link" danger onClick={() => remove(name)}>删除</Button>
+                            </Space>
+                          );
+                        })}
+                        <Button type="dashed" onClick={() => add()} block>
+                          + 添加学生
+                        </Button>
+                      </>
+                  )}
+                </Form.List>
               </Form>
             </Modal>
           </div>
@@ -214,7 +274,7 @@ export function DormitoryPage() {
                     <Select options={[{ label: "男生宿舍", value: "male" }, { label: "女生宿舍", value: "female" }]} />
                   </Form.Item>
                   <Form.Item name="floorCount" label="楼层数" rules={[{ required: true }]} style={{ width: 160 }}>
-                    <InputNumber min={1} max={10} style={{ width: "100%" }} />
+                    <Select options={[1,2,3,4,5,6,7,8,9,10].map((n) => ({ label: `${n}层`, value: n }))} style={{ width: "100%" }} />
                   </Form.Item>
                 </Space>
               </Form>
