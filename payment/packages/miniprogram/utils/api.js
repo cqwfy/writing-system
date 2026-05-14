@@ -1,4 +1,4 @@
-const BASE_URL = "http://8.160.165.176/api/v1";
+const BASE_URL = "http://8.160.165.176:3000/api/v1";
 
 function request(options) {
   const { url, method = "GET", data, needAuth = true } = options;
