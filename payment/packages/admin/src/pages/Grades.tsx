@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button, message, Modal, Tag, Space, Form, Select, InputNumber, DatePicker, Tabs, Descriptions, Card, Statistic, Row, Col, Table } from "antd";
-import { PlusOutlined, SendOutlined, BarChartOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, SendOutlined, BarChartOutlined, DeleteOutlined, CloseOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
@@ -25,8 +26,10 @@ interface GradeRecord {
 }
 
 export function GradesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const examActionRef = useRef<ActionType>();
   const gradeActionRef = useRef<ActionType>();
+  const activeTab = searchParams.get("tab") || "exams";
   const [examModalVisible, setExamModalVisible] = useState(false);
   const [gradeModalVisible, setGradeModalVisible] = useState(false);
   const [statsModalVisible, setStatsModalVisible] = useState(false);
@@ -141,6 +144,14 @@ export function GradesPage() {
       fieldProps: { allowClear: true, placeholder: "全部科目" },
       valueEnum: Object.fromEntries(courses.map((c) => [String(c.id), c.name])),
     },
+    {
+      title: "班级",
+      dataIndex: "classId",
+      hideInTable: true,
+      valueType: "select",
+      fieldProps: { allowClear: true, placeholder: "全部班级" },
+      valueEnum: Object.fromEntries(classes.map((c) => [String(c.id), c.name])),
+    },
     { title: "学生", dataIndex: ["student", "name"], key: "student", width: 100, search: false },
     { title: "学号", dataIndex: ["student", "studentNo"], key: "studentNo", width: 120, search: false },
     { title: "科目", dataIndex: ["course", "name"], key: "course", width: 100, search: false },
@@ -189,7 +200,7 @@ export function GradesPage() {
 
   return (
     <>
-      <Tabs defaultActiveKey="exams" items={[
+      <Tabs activeKey={activeTab} onChange={(key) => setSearchParams({ tab: key })} items={[
         {
           key: "exams",
         label: "考试管理",
@@ -255,7 +266,7 @@ export function GradesPage() {
             columns={gradeColumns}
             request={async (params) => {
               if (!params.examTypeId) return { data: [], total: 0, success: true };
-              const res = await api.get("/grades", { params: { page: params.current, pageSize: params.pageSize, examTypeId: params.examTypeId, courseId: params.courseId || undefined } });
+              const res = await api.get("/grades", { params: { page: params.current, pageSize: params.pageSize, examTypeId: params.examTypeId, courseId: params.courseId || undefined, classId: params.classId || undefined } });
               return { data: res.data.data.data, total: res.data.data.total, success: true };
             }}
             actionRef={gradeActionRef}
@@ -316,7 +327,7 @@ export function GradesPage() {
 
       <Modal title="成绩统计" open={statsModalVisible}
         onCancel={() => setStatsModalVisible(false)}
-        footer={null} width={700}
+        footer={[<Button key="close" onClick={() => setStatsModalVisible(false)}>关闭</Button>]} width={700}
       >
         {stats && (
           <Row gutter={16}>

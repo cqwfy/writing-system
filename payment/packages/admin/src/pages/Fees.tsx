@@ -4,6 +4,7 @@ import { PlusOutlined, DollarOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PAYMENT_STATUS_MAP } from "../constants/status";
 
 interface FeeItem {
   id: number;
@@ -83,15 +84,9 @@ export function FeesPage() {
     {
       title: "状态", dataIndex: "status", key: "status", width: 80,
       valueType: "select",
-      valueEnum: { unpaid: "未缴", partial: "部分", paid: "已缴", waived: "免除" },
+      valueEnum: Object.fromEntries(Object.entries(PAYMENT_STATUS_MAP).map(([k, v]) => [k, v.text])),
       render: (_, r) => {
-        const m: Record<string, { text: string; color: string }> = {
-          unpaid: { text: "未缴", color: "red" },
-          partial: { text: "部分", color: "orange" },
-          paid: { text: "已缴", color: "green" },
-          waived: { text: "免除", color: "default" },
-        };
-        const s = m[r.status];
+        const s = PAYMENT_STATUS_MAP[r.status];
         return s ? <Tag color={s.color}>{s.text}</Tag> : r.status;
       },
     },

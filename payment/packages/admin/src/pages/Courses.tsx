@@ -85,6 +85,7 @@ export function CourseListPage() {
       title: "操作",
       key: "action",
       width: 120,
+      hideInSearch: true,
       render: (_, record) => (
         <Space>
           <Button type="link" onClick={() => {

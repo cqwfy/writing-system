@@ -9,6 +9,8 @@ import {
   LogoutOutlined,
   UserOutlined,
   BookOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth";
 import { UserDashboard } from "../pages/UserDashboard";
@@ -38,6 +40,7 @@ export function UserLayout() {
     { key: "/attendance", icon: <CheckSquareOutlined />, label: "考勤记录" },
     { key: "/fees", icon: <DollarOutlined />, label: "费用中心" },
     { key: "/notices", icon: <NotificationOutlined />, label: "通知公告" },
+    { key: "/profile", icon: <UserOutlined />, label: "个人信息" },
   ];
 
   const userMenu = {
@@ -69,12 +72,9 @@ export function UserLayout() {
         <Header style={{ padding: "0 24px", background: themeToken.colorBgContainer, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Button
             type="text"
-            icon={collapsed ? "☰" : "☰"}
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
-            style={{ fontSize: 16 }}
-          >
-            {collapsed ? "" : ""}
-          </Button>
+          />
           <Dropdown menu={userMenu}>
             <Button type="text" icon={<UserOutlined />}>
               {user?.name || "用户"}

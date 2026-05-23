@@ -4,6 +4,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { BUILDING_TYPE_MAP } from "../constants/status";
 
 interface Building {
   id: number;
@@ -109,7 +110,10 @@ export function DormitoryPage() {
 
   const buildingColumns: ProColumns<Building>[] = [
     { title: "名称", dataIndex: "name", key: "name", width: 150 },
-    { title: "类型", dataIndex: "buildingType", key: "buildingType", width: 80, render: (_, r) => r.buildingType === "male" ? <Tag color="blue">男</Tag> : <Tag color="pink">女</Tag> },
+    { title: "类型", dataIndex: "buildingType", key: "buildingType", width: 80, render: (_, r) => {
+        const b = BUILDING_TYPE_MAP[r.buildingType];
+        return b ? <Tag color={b.color}>{b.text}</Tag> : r.buildingType;
+      }},
     { title: "楼层数", dataIndex: "floorCount", key: "floorCount", width: 80 },
   ];
 

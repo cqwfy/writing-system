@@ -44,9 +44,6 @@ export function LoginPage() {
             </Button>
           </Form.Item>
         </Form>
-        <Typography.Text type="secondary" style={{ display: "block", textAlign: "center", whiteSpace: "pre-line" }}>
-          {"管理员: admin / 教师: teacher1 / 学生: student1\n家长: parent_f_20260001 / 初始密码见各自角色"}
-        </Typography.Text>
       </Card>
     </div>
   );

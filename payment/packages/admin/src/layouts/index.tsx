@@ -18,6 +18,7 @@ import {
   MenuUnfoldOutlined,
   IdcardOutlined,
   LockOutlined,
+  FundOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth";
 import api from "../services/api";
@@ -45,7 +46,7 @@ const allMenuItems = [
   { key: "/courses", icon: <BookOutlined />, label: "课程管理", roles: ["admin", "teacher"] },
   { key: "/timetable", icon: <ScheduleOutlined />, label: "课表管理", roles: ["admin", "teacher"] },
   { key: "/attendance", icon: <CheckSquareOutlined />, label: "考勤管理", roles: ["admin", "teacher"] },
-  { key: "/grades", icon: <PieChartOutlined />, label: "成绩管理", roles: ["admin", "teacher"] },
+  { key: "/grades", icon: <FundOutlined />, label: "成绩管理", roles: ["admin", "teacher"] },
   { key: "/fees", icon: <DollarOutlined />, label: "费用管理", roles: ["admin"] },
   { key: "/notices", icon: <NotificationOutlined />, label: "通知公告", roles: ["admin", "teacher"] },
   { key: "/dormitory", icon: <HomeOutlined />, label: "宿舍管理", roles: ["admin"] },

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, message, Modal, Upload, Tag, Space, Descriptions, Form, Input, Select, DatePicker, Tooltip } from "antd";
-import { PlusOutlined, UploadOutlined, DownloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { PlusOutlined, UploadOutlined, DownloadOutlined, EyeOutlined, EditOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { GENDER_MAP, STUDENT_STATUS_MAP } from "../constants/status";
 
 interface StudentRecord {
   id: number;
@@ -26,9 +27,10 @@ interface ClassOption {
 export function StudentListPage() {
   const [detailVisible, setDetailVisible] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<StudentRecord | null>(null);
-  const [createVisible, setCreateVisible] = useState(false);
+  const [formVisible, setFormVisible] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
   const [classes, setClasses] = useState<ClassOption[]>([]);
-  const [createLoading, setCreateLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [form] = Form.useForm();
   const actionRef = useRef<ActionType>();
 
@@ -38,8 +40,8 @@ export function StudentListPage() {
     });
   }, []);
 
-  const handleCreate = async (values: Record<string, unknown>) => {
-    setCreateLoading(true);
+  const handleSubmit = async (values: Record<string, unknown>) => {
+    setSubmitLoading(true);
     try {
       const payload = {
         ...values,
@@ -50,16 +52,46 @@ export function StudentListPage() {
           ? (values.birthDate as { format: (f: string) => string }).format("YYYY-MM-DD")
           : undefined,
       };
-      await api.post("/students", payload);
-      message.success("新增学生成功");
-      setCreateVisible(false);
+
+      if (editingStudent) {
+        await api.put(`/students/${editingStudent.id}`, payload);
+        message.success("更新成功");
+      } else {
+        await api.post("/students", payload);
+        message.success("新增学生成功");
+      }
+      setFormVisible(false);
       form.resetFields();
+      setEditingStudent(null);
       actionRef.current?.reload();
     } catch (err: any) {
-      message.error(err.response?.data?.error || "新增失败");
+      message.error(err.response?.data?.error || "操作失败");
     } finally {
-      setCreateLoading(false);
+      setSubmitLoading(false);
     }
+  };
+
+  const openEdit = (record: StudentRecord) => {
+    setEditingStudent(record);
+    form.setFieldsValue({
+      studentNo: record.studentNo,
+      name: record.name,
+      gender: record.gender,
+      classId: record.class?.id ?? undefined,
+      address: record.address,
+      hobbies: record.hobbies,
+      fatherName: record.parents?.find((p) => p.relation === "father")?.name,
+      fatherPhone: record.parents?.find((p) => p.relation === "father")?.phone,
+      motherName: record.parents?.find((p) => p.relation === "mother")?.name,
+      motherPhone: record.parents?.find((p) => p.relation === "mother")?.phone,
+    });
+    setFormVisible(true);
+  };
+
+  const openAdd = () => {
+    setEditingStudent(null);
+    form.resetFields();
+    setFormVisible(true);
   };
 
   const handleDelete = (id: number, name: string) => {
@@ -121,7 +153,7 @@ export function StudentListPage() {
       key: "status",
       hideInTable: true,
       valueType: "select",
-      valueEnum: { active: "在读", graduated: "毕业", transferred: "转学", suspended: "休学" },
+      valueEnum: Object.fromEntries(Object.entries(STUDENT_STATUS_MAP).map(([k, v]) => [k, v.text])),
     },
     { title: "学号", dataIndex: "studentNo", key: "studentNo", width: 120, hideInSearch: true },
     { title: "姓名", dataIndex: "name", key: "name", width: 100, hideInSearch: true },
@@ -129,56 +161,45 @@ export function StudentListPage() {
       title: "性别",
       dataIndex: "gender",
       key: "gender",
-      width: 80,
+      width: 60,
       hideInSearch: true,
-      render: (_, r) => (r.gender === "male" ? <Tag color="blue">男</Tag> : <Tag color="pink">女</Tag>),
+      render: (_, r) => {
+        const g = GENDER_MAP[r.gender];
+        return g ? <Tag color={g.color}>{g.text}</Tag> : r.gender;
+      },
     },
     {
       title: "班级",
       dataIndex: ["class", "name"],
       key: "class",
-      width: 140,
+      width: 120,
       hideInSearch: true,
       render: (_, r) => r.class?.name || "-",
     },
-    { title: "爱好", dataIndex: "hobbies", key: "hobbies", width: 100, ellipsis: true, hideInSearch: true },
-    { title: "住址", dataIndex: "address", key: "address", width: 160, ellipsis: true, hideInSearch: true },
+    { title: "爱好", dataIndex: "hobbies", key: "hobbies", width: 90, ellipsis: true, hideInSearch: true },
+    { title: "住址", dataIndex: "address", key: "address", width: 140, ellipsis: true, hideInSearch: true },
     {
       title: "状态",
       dataIndex: "status",
       key: "status_table",
-      width: 80,
+      width: 70,
       hideInSearch: true,
       render: (_, r) => {
-        const map: Record<string, string> = { active: "在读", graduated: "毕业", transferred: "转学", suspended: "休学" };
-        const colorMap: Record<string, string> = { active: "green", graduated: "blue", transferred: "orange", suspended: "red" };
-        return <Tag color={colorMap[r.status] || "default"}>{map[r.status] || r.status}</Tag>;
+        const s = STUDENT_STATUS_MAP[r.status];
+        return s ? <Tag color={s.color}>{s.text}</Tag> : r.status;
       },
     },
     {
       title: "操作",
       key: "action",
-      width: 160,
+      width: 200,
+      fixed: "right",
       hideInSearch: true,
       render: (_, record) => (
-        <Space>
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => {
-              setCurrentStudent(record);
-              setDetailVisible(true);
-            }}
-          >
-            详情
-          </Button>
-          <Button
-            type="link"
-            danger
-            onClick={() => handleDelete(record.id, record.name)}
-          >
-            删除
-          </Button>
+        <Space size={0} split={<span style={{ color: "#e8e8e8" }}>|</span>}>
+          <Button type="link" size="small" onClick={() => openEdit(record)}>编辑</Button>
+          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => { setCurrentStudent(record); setDetailVisible(true); }}>详情</Button>
+          <Button type="link" size="small" danger onClick={() => handleDelete(record.id, record.name)}>删除</Button>
         </Space>
       ),
     },
@@ -203,11 +224,11 @@ export function StudentListPage() {
         }}
         actionRef={actionRef}
         rowKey="id"
-        scroll={{ x: 960 }}
+        scroll={{ x: 1000 }}
         search={{ labelWidth: "auto" }}
         headerTitle="学生列表"
         toolBarRender={() => [
-          <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => setCreateVisible(true)}>
+          <Button key="add" type="primary" icon={<PlusOutlined />} onClick={openAdd}>
             新增学生
           </Button>,
           <Upload
@@ -251,17 +272,25 @@ export function StudentListPage() {
         title="学生详情"
         open={detailVisible}
         onCancel={() => setDetailVisible(false)}
-        footer={null}
+        footer={[
+          currentStudent && (
+            <Button key="edit" type="primary" icon={<EditOutlined />} onClick={() => {
+              setDetailVisible(false);
+              openEdit(currentStudent);
+            }}>编辑</Button>
+          ),
+          <Button key="close" onClick={() => setDetailVisible(false)}>关闭</Button>,
+        ]}
         width={600}
       >
         {currentStudent && (
           <Descriptions column={2} bordered size="small">
             <Descriptions.Item label="学号">{currentStudent.studentNo}</Descriptions.Item>
             <Descriptions.Item label="姓名">{currentStudent.name}</Descriptions.Item>
-            <Descriptions.Item label="性别">{currentStudent.gender === "male" ? "男" : "女"}</Descriptions.Item>
+            <Descriptions.Item label="性别">{GENDER_MAP[currentStudent.gender]?.text || currentStudent.gender}</Descriptions.Item>
             <Descriptions.Item label="班级">{currentStudent.class?.name || "-"}</Descriptions.Item>
             <Descriptions.Item label="爱好">{currentStudent.hobbies || "-"}</Descriptions.Item>
-            <Descriptions.Item label="状态">{currentStudent.status === "active" ? "在读" : currentStudent.status}</Descriptions.Item>
+            <Descriptions.Item label="状态">{STUDENT_STATUS_MAP[currentStudent.status]?.text || currentStudent.status}</Descriptions.Item>
             <Descriptions.Item label="住址" span={2}>{currentStudent.address || "-"}</Descriptions.Item>
             {currentStudent.parents?.map((p) => (
               <Descriptions.Item key={p.relation} label={p.relation === "father" ? "父亲" : "母亲"}>
@@ -273,17 +302,18 @@ export function StudentListPage() {
       </Modal>
 
       <Modal
-        title="新增学生"
-        open={createVisible}
+        title={editingStudent ? "编辑学生" : "新增学生"}
+        open={formVisible}
         onCancel={() => {
-          setCreateVisible(false);
+          setFormVisible(false);
           form.resetFields();
+          setEditingStudent(null);
         }}
         onOk={() => form.submit()}
-        confirmLoading={createLoading}
+        confirmLoading={submitLoading}
         width={640}
       >
-        <Form form={form} layout="vertical" onFinish={handleCreate}>
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Space style={{ display: "flex", gap: 16 }} wrap>
             <Form.Item name="studentNo" label="学号" rules={[{ required: true, message: "请输入学号" }]} style={{ width: 180 }}>
               <Input placeholder="如 20260011" />

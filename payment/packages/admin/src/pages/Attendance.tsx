@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button, message, Modal, Tag, Space, Form, Select, DatePicker, Tabs } from "antd";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { ATTENDANCE_STATUS_MAP, LEAVE_STATUS_MAP } from "../constants/status";
 
 interface AttendanceRecord {
   id: number;
@@ -23,19 +25,12 @@ interface LeaveRequest {
   status: string;
 }
 
-const STATUS_MAP: Record<string, { text: string; color: string }> = {
-  present: { text: "出勤", color: "green" },
-  absent: { text: "缺勤", color: "red" },
-  late: { text: "迟到", color: "orange" },
-  early_leave: { text: "早退", color: "gold" },
-  sick_leave: { text: "病假", color: "blue" },
-  personal_leave: { text: "事假", color: "purple" },
-};
-
 export function AttendancePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const actionRef = useRef<ActionType>();
   const leaveActionRef = useRef<ActionType>();
   const [classes, setClasses] = useState<{ id: number; name: string }[]>([]);
+  const activeTab = searchParams.get("tab") || "attendance";
 
   useEffect(() => {
     api.get("/classes/all").then((res) => setClasses(res.data.data || []));
@@ -55,12 +50,9 @@ export function AttendancePage() {
     {
       title: "状态", dataIndex: "status", key: "status", width: 80,
       valueType: "select",
-      valueEnum: {
-        present: "出勤", absent: "缺勤", late: "迟到",
-        early_leave: "早退", sick_leave: "病假", personal_leave: "事假",
-      },
+      valueEnum: Object.fromEntries(Object.entries(ATTENDANCE_STATUS_MAP).map(([k, v]) => [k, v.text])),
       render: (_, r) => {
-        const s = STATUS_MAP[r.status];
+        const s = ATTENDANCE_STATUS_MAP[r.status];
         return s ? <Tag color={s.color}>{s.text}</Tag> : r.status;
       },
     },
@@ -79,12 +71,7 @@ export function AttendancePage() {
     {
       title: "状态", dataIndex: "status", key: "status", width: 80,
       render: (_, r) => {
-        const m: Record<string, { text: string; color: string }> = {
-          pending: { text: "待审批", color: "orange" },
-          approved: { text: "已批准", color: "green" },
-          rejected: { text: "已拒绝", color: "red" },
-        };
-        const s = m[r.status];
+        const s = LEAVE_STATUS_MAP[r.status];
         return s ? <Tag color={s.color}>{s.text}</Tag> : r.status;
       },
     },
@@ -108,7 +95,7 @@ export function AttendancePage() {
   ];
 
   return (
-    <Tabs defaultActiveKey="attendance" items={[
+    <Tabs activeKey={activeTab} onChange={(key) => setSearchParams({ tab: key })} items={[
       {
         key: "attendance",
         label: "考勤记录",
