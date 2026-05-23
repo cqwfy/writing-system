@@ -14,7 +14,7 @@ export const STUDENT_STATUS_MAP: Record<string, { text: string; color: string }>
   active: { text: "在读", color: "green" },
   graduated: { text: "毕业", color: "blue" },
   transferred: { text: "转学", color: "orange" },
-  suspended: { text: "休学", color: "red" },
+  withdrawn: { text: "休学", color: "red" },
 };
 
 /** 考勤状态 */

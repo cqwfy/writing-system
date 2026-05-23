@@ -62,8 +62,12 @@ export class GradeController {
   async getStats(req: Request, res: Response, next: NextFunction) {
     try {
       const examId = parseInt(req.params.examId);
-      const { courseId } = req.query;
-      const result = await gradeService.getStats(examId, courseId ? parseInt(courseId as string) : undefined);
+      const { courseId, classId } = req.query;
+      const result = await gradeService.getStats(
+        examId,
+        courseId ? parseInt(courseId as string) : undefined,
+        classId ? parseInt(classId as string) : undefined,
+      );
       res.json({ success: true, data: result });
     } catch (err) { next(err); }
   }

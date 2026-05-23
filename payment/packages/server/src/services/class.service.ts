@@ -97,6 +97,70 @@ export class ClassService {
       prisma.class.update({ where: { id: toClassId }, data: { studentCount: { increment: 1 } } }),
     ]);
   }
+
+  /**
+   * 批量升年级：低年级升一级，最高年级（12）学生毕业、班级归档
+   */
+  async promoteGrades() {
+    const GRADE_LABELS: Record<string, string> = {
+      "7": "七年级", "8": "八年级", "9": "九年级",
+      "10": "高一", "11": "高二", "12": "高三",
+    };
+    const NEXT_GRADE: Record<string, string> = {
+      "7": "8", "8": "9", "9": "10", "10": "11", "11": "12",
+    };
+
+    const activeClasses = await prisma.class.findMany({ where: { status: "active" } });
+
+    let promotedStudents = 0;
+    let graduatedStudents = 0;
+    let promotedClasses = 0;
+    let archivedClasses = 0;
+
+    await prisma.$transaction(async (tx) => {
+      for (const cls of activeClasses) {
+        const gradeLevel = cls.gradeLevel;
+
+        if (gradeLevel === "12") {
+          // 高三 → 毕业
+          const result = await tx.student.updateMany({
+            where: { classId: cls.id, deletedAt: null, status: "active" },
+            data: { status: "graduated" },
+          });
+          graduatedStudents += result.count;
+          await tx.class.update({
+            where: { id: cls.id },
+            data: { status: "archived" },
+          });
+          archivedClasses++;
+        } else if (NEXT_GRADE[gradeLevel]) {
+          // 低年级 → 升一级
+          const newGradeLevel = NEXT_GRADE[gradeLevel];
+          const oldLabel = GRADE_LABELS[gradeLevel];
+          const newLabel = GRADE_LABELS[newGradeLevel];
+          const newName = cls.name.replace(oldLabel, newLabel);
+
+          const result = await tx.student.updateMany({
+            where: { classId: cls.id, deletedAt: null, status: "active" },
+            data: {},
+          });
+          // 统计该班活跃学生数
+          const count = await tx.student.count({
+            where: { classId: cls.id, deletedAt: null, status: "active" },
+          });
+          promotedStudents += count;
+
+          await tx.class.update({
+            where: { id: cls.id },
+            data: { gradeLevel: newGradeLevel, name: newName, studentCount: count },
+          });
+          promotedClasses++;
+        }
+      }
+    });
+
+    return { promotedStudents, graduatedStudents, promotedClasses, archivedClasses };
+  }
 }
 
 export const classService = new ClassService();

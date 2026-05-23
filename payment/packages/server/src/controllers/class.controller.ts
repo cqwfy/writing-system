@@ -88,6 +88,15 @@ export class ClassController {
       next(err);
     }
   }
+
+  async promoteGrades(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await classService.promoteGrades();
+      res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 export const classController = new ClassController();

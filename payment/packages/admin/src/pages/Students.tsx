@@ -94,9 +94,10 @@ export function StudentListPage() {
         address: detail.address,
         hobbies: detail.hobbies,
         fatherName: detail.parents?.find((p: any) => p.relation === "father")?.name,
-        fatherPhone: "",
+        fatherPhone: detail.parents?.find((p: any) => p.relation === "father")?.phone || "",
         motherName: detail.parents?.find((p: any) => p.relation === "mother")?.name,
-        motherPhone: "",
+        motherPhone: detail.parents?.find((p: any) => p.relation === "mother")?.phone || "",
+        status: detail.status,
       });
     } catch {
       message.error("加载学生信息失败");
@@ -360,6 +361,15 @@ export function StudentListPage() {
             </Form.Item>
             <Form.Item name="enrollmentDate" label="入学日期" style={{ width: 180 }}>
               <DatePicker style={{ width: "100%" }} />
+            </Form.Item>
+          </Space>
+          <Space style={{ display: "flex", gap: 16 }} wrap>
+            <Form.Item name="status" label="状态" style={{ width: 180 }}>
+              <Select
+                allowClear
+                placeholder="选择状态"
+                options={Object.entries(STUDENT_STATUS_MAP).map(([k, v]) => ({ label: v.text, value: k }))}
+              />
             </Form.Item>
           </Space>
           <Form.Item name="address" label="住址">

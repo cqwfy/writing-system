@@ -192,9 +192,12 @@ export class GradeService {
   /**
    * 成绩统计
    */
-  async getStats(examTypeId: number, courseId?: number) {
+  async getStats(examTypeId: number, courseId?: number, classId?: number) {
     const where: Prisma.GradeWhereInput = { examTypeId, student: { deletedAt: null } };
     if (courseId) where.courseId = courseId;
+    if (classId) {
+      where.student = { ...((where.student as any) || {}), classId, deletedAt: null };
+    }
 
     const grades = await prisma.grade.findMany({
       where,

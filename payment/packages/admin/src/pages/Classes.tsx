@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Button, message, Modal, Tag, Space, Form, Input, Select, Popconfirm } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, RiseOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
@@ -48,6 +48,51 @@ export function ClassListPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePromoteGrades = () => {
+    Modal.confirm({
+      title: "执行学年升级",
+      icon: <RiseOutlined />,
+      content: (
+        <div style={{ lineHeight: 2 }}>
+          <p>确定要执行<strong>学年升级</strong>吗？执行后：</p>
+          <div style={{ background: "#f5f5f5", borderRadius: 8, padding: "8px 16px", margin: "8px 0" }}>
+            <p style={{ margin: 2 }}>七年级 → 八年级</p>
+            <p style={{ margin: 2 }}>八年级 → 九年级</p>
+            <p style={{ margin: 2 }}>九年级 → 高一</p>
+            <p style={{ margin: 2 }}>高一 → 高二</p>
+            <p style={{ margin: 2 }}>高二 → 高三</p>
+            <p style={{ margin: 2, color: "#cf1322" }}>高三 → 已毕业</p>
+          </div>
+          <p style={{ color: "#ff4d4f" }}>此操作不可撤销！</p>
+        </div>
+      ),
+      okText: "确认升级",
+      okButtonProps: { danger: true },
+      width: 480,
+      onOk: async () => {
+        try {
+          const res = await api.post("/classes/promote-grades");
+          const { promotedStudents, graduatedStudents, promotedClasses, archivedClasses } = res.data.data;
+          Modal.info({
+            title: "学年升级完成",
+            content: (
+              <div style={{ lineHeight: 2.2 }}>
+                <p>升级班级：<strong>{promotedClasses}</strong> 个</p>
+                <p>升级学生：<strong>{promotedStudents}</strong> 名</p>
+                <p>毕业学生：<strong>{graduatedStudents}</strong> 名</p>
+                <p>归档班级：<strong>{archivedClasses}</strong> 个</p>
+              </div>
+            ),
+            okText: "知道了",
+          });
+          actionRef.current?.reload();
+        } catch (err: any) {
+          message.error(err.response?.data?.error || "学年升级失败");
+        }
+      },
+    });
   };
 
   const columns: ProColumns<ClassRecord>[] = [
@@ -125,6 +170,9 @@ export function ClassListPage() {
             form.resetFields();
             setModalVisible(true);
           }}>新增班级</Button>,
+          <Button key="promote" icon={<RiseOutlined />} onClick={handlePromoteGrades}>
+            执行学年升级
+          </Button>,
         ]}
       />
       <Modal title={editingId ? "编辑班级" : "新增班级"} open={modalVisible}

@@ -22,6 +22,7 @@ export const createStudentSchema = z.object({
   studentNo: z.string().min(1).max(20),
   name: z.string().min(1).max(50),
   gender: z.nativeEnum(Gender),
+  status: z.nativeEnum(StudentStatus).optional(),
   birthDate: z.string().optional(),
   idCard: z.string().max(18).optional(),
   address: z.string().max(255).optional(),

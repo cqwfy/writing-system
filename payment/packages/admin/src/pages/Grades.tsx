@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Button, message, Modal, Tag, Space, Form, Select, InputNumber, DatePicker, Tabs, Descriptions, Card, Statistic, Row, Col, Table } from "antd";
+import { Button, message, Modal, Tag, Space, Form, Select, InputNumber, DatePicker, Tabs, Descriptions, Card, Statistic, Row, Col, Table, Radio } from "antd";
 import { PlusOutlined, SendOutlined, BarChartOutlined, DeleteOutlined, CloseOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
@@ -45,6 +45,10 @@ export function GradesPage() {
   const [gradeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [examTypeName, setExamTypeName] = useState<string>("");
+  const [statsScopeVisible, setStatsScopeVisible] = useState(false);
+  const [statsScopeType, setStatsScopeType] = useState<"grade" | "class">("grade");
+  const [statsScopeClassId, setStatsScopeClassId] = useState<number | undefined>(undefined);
+  const [statsExamId, setStatsExamId] = useState<number | null>(null);
 
   const loadExamOptions = () => {
     api.get("/grades/exams").then((res) => {
@@ -68,6 +72,22 @@ export function GradesPage() {
     setGradeClassId(classId);
     const res = await api.get(`/classes/${classId}/students`);
     setClassStudents(res.data.data || []);
+  };
+
+  const handleStatsConfirm = async () => {
+    if (!statsExamId) return;
+    setStatsScopeVisible(false);
+    try {
+      const params: any = {};
+      if (statsScopeType === "class" && statsScopeClassId) {
+        params.classId = statsScopeClassId;
+      }
+      const res = await api.get(`/grades/stats/${statsExamId}`, { params });
+      setStats(res.data.data);
+      setStatsModalVisible(true);
+    } catch (err: any) {
+      message.error(err.response?.data?.error || "获取统计失败");
+    }
   };
 
   const examColumns: ProColumns<ExamRecord>[] = [
@@ -102,15 +122,11 @@ export function GradesPage() {
               message.error(err.response?.data?.error || "发布失败");
             }
           }}>发布</Button>
-          <Button type="link" icon={<BarChartOutlined />} onClick={async () => {
-            try {
-              setSelectedExamId(record.id);
-              const res = await api.get(`/grades/stats/${record.id}`);
-              setStats(res.data.data);
-              setStatsModalVisible(true);
-            } catch (err: any) {
-              message.error(err.response?.data?.error || "获取统计失败");
-            }
+          <Button type="link" icon={<BarChartOutlined />} onClick={() => {
+            setStatsExamId(record.id);
+            setStatsScopeType("grade");
+            setStatsScopeClassId(undefined);
+            setStatsScopeVisible(true);
           }}>统计</Button>
           <Button type="link" danger icon={<DeleteOutlined />} onClick={async () => {
             try {
@@ -324,6 +340,35 @@ export function GradesPage() {
             )}
           </Form.List>
         </Form>
+      </Modal>
+
+      <Modal title="选择统计范围" open={statsScopeVisible}
+        onCancel={() => setStatsScopeVisible(false)}
+        onOk={handleStatsConfirm}
+        okText="确认"
+        width={420}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Radio.Group
+            value={statsScopeType}
+            onChange={(e) => {
+              setStatsScopeType(e.target.value);
+              setStatsScopeClassId(undefined);
+            }}
+          >
+            <Radio.Button value="grade">整个年级</Radio.Button>
+            <Radio.Button value="class">指定班级</Radio.Button>
+          </Radio.Group>
+        </div>
+        {statsScopeType === "class" && (
+          <Select
+            placeholder="选择班级"
+            style={{ width: "100%" }}
+            value={statsScopeClassId}
+            onChange={(val) => setStatsScopeClassId(val)}
+            options={classes.map((c) => ({ label: c.name, value: c.id }))}
+          />
+        )}
       </Modal>
 
       <Modal title="成绩统计" open={statsModalVisible}

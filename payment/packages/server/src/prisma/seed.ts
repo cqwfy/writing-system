@@ -131,7 +131,7 @@ async function main() {
         passwordHash: fatherHash,
         role: "parent",
         name: `${s.name.split("")[0]}爸爸`,
-        phone: `1380000${String(1000 + i).slice(1)}`,
+        phone: `13800000${String(1000 + i).slice(1)}`,
       },
     });
 
@@ -141,7 +141,7 @@ async function main() {
         passwordHash: motherHash,
         role: "parent",
         name: `${s.name.split("")[0]}妈妈`,
-        phone: `1390000${String(1000 + i).slice(1)}`,
+        phone: `13900000${String(1000 + i).slice(1)}`,
       },
     });
 

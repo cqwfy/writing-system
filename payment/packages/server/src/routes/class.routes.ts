@@ -7,6 +7,7 @@ export const classRouter = Router();
 
 classRouter.use(authMiddleware);
 classRouter.get("/", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => classController.list(req, res, next));
+classRouter.post("/promote-grades", rbacMiddleware(Role.ADMIN), (req, res, next) => classController.promoteGrades(req, res, next));
 classRouter.get("/all", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => classController.getAll(req, res, next));
 classRouter.get("/:id", rbacMiddleware(Role.ADMIN, Role.TEACHER), (req, res, next) => classController.getById(req, res, next));
 classRouter.post("/", rbacMiddleware(Role.ADMIN), (req, res, next) => classController.create(req, res, next));

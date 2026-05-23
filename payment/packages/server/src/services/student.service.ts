@@ -19,8 +19,9 @@ export class StudentService {
     classId?: number;
     gradeLevel?: string;
     status?: string;
+    userRole?: string;
   }) {
-    const { page = 1, pageSize = 20, keyword, classId, gradeLevel, status } = params;
+    const { page = 1, pageSize = 20, keyword, classId, gradeLevel, status, userRole } = params;
     const where: Prisma.StudentWhereInput = {};
 
     if (keyword) {
@@ -50,7 +51,7 @@ export class StudentService {
     ]);
 
     return {
-      data: data.map((s) => this.maskSensitive(s)),
+      data: data.map((s) => this.maskSensitive(s, userRole)),
       total,
       page,
       pageSize,
@@ -61,7 +62,7 @@ export class StudentService {
   /**
    * 获取单个学生详情
    */
-  async getById(id: number) {
+  async getById(id: number, userRole?: string) {
     const student = await prisma.student.findFirst({
       where: { id, deletedAt: null },
       include: {
@@ -73,7 +74,7 @@ export class StudentService {
     });
 
     if (!student) throw new AppError(404, "学生不存在");
-    return this.maskSensitive(student);
+    return this.maskSensitive(student, userRole);
   }
 
   /**
@@ -204,6 +205,7 @@ export class StudentService {
     if (data.nativePlace !== undefined) updateData.nativePlace = data.nativePlace;
     if (data.hobbies !== undefined) updateData.hobbies = data.hobbies;
     if (data.enrollmentDate !== undefined) updateData.enrollmentDate = data.enrollmentDate ? new Date(data.enrollmentDate) : null;
+    if (data.status !== undefined) updateData.status = data.status;
 
     // 班级变更处理
     if (data.classId !== undefined && data.classId !== student.classId) {
@@ -214,6 +216,90 @@ export class StudentService {
         await prisma.class.update({ where: { id: data.classId }, data: { studentCount: { increment: 1 } } });
       }
       updateData.classId = data.classId;
+    }
+
+    // 获取已有家长记录
+    const existingParents = await prisma.parent.findMany({ where: { studentId: id } });
+    const existingFather = existingParents.find((p) => p.relation === "father");
+    const existingMother = existingParents.find((p) => p.relation === "mother");
+
+    // 更新父亲信息
+    if (data.fatherName !== undefined || data.fatherPhone !== undefined) {
+      if (existingFather) {
+        const fatherUserUpdate: any = {};
+        if (data.fatherName !== undefined) fatherUserUpdate.name = data.fatherName;
+        if (data.fatherPhone !== undefined) fatherUserUpdate.phone = data.fatherPhone;
+        if (Object.keys(fatherUserUpdate).length > 0) {
+          await prisma.user.update({ where: { id: existingFather.userId }, data: fatherUserUpdate });
+        }
+        const fatherUpdate: any = {};
+        if (data.fatherName !== undefined) fatherUpdate.name = data.fatherName;
+        if (data.fatherPhone !== undefined) fatherUpdate.phone = data.fatherPhone;
+        if (Object.keys(fatherUpdate).length > 0) {
+          await prisma.parent.update({ where: { id: existingFather.id }, data: fatherUpdate });
+        }
+      } else if (data.fatherName || data.fatherPhone) {
+        // 新建父亲记录
+        const parentHash = await bcrypt.hash("Parent@123", 10);
+        const fatherUser = await prisma.user.create({
+          data: {
+            username: `parent_${student.studentNo}_f`,
+            passwordHash: parentHash,
+            role: "parent",
+            name: data.fatherName || `${student.name}父亲`,
+            phone: data.fatherPhone,
+          },
+        });
+        await prisma.parent.create({
+          data: {
+            userId: fatherUser.id,
+            studentId: id,
+            relation: "father",
+            name: data.fatherName || `${student.name}父亲`,
+            phone: data.fatherPhone || "",
+            isPrimary: true,
+          },
+        });
+      }
+    }
+
+    // 更新母亲信息
+    if (data.motherName !== undefined || data.motherPhone !== undefined) {
+      if (existingMother) {
+        const motherUserUpdate: any = {};
+        if (data.motherName !== undefined) motherUserUpdate.name = data.motherName;
+        if (data.motherPhone !== undefined) motherUserUpdate.phone = data.motherPhone;
+        if (Object.keys(motherUserUpdate).length > 0) {
+          await prisma.user.update({ where: { id: existingMother.userId }, data: motherUserUpdate });
+        }
+        const motherUpdate: any = {};
+        if (data.motherName !== undefined) motherUpdate.name = data.motherName;
+        if (data.motherPhone !== undefined) motherUpdate.phone = data.motherPhone;
+        if (Object.keys(motherUpdate).length > 0) {
+          await prisma.parent.update({ where: { id: existingMother.id }, data: motherUpdate });
+        }
+      } else if (data.motherName || data.motherPhone) {
+        const parentHash = await bcrypt.hash("Parent@123", 10);
+        const motherUser = await prisma.user.create({
+          data: {
+            username: `parent_${student.studentNo}_m`,
+            passwordHash: parentHash,
+            role: "parent",
+            name: data.motherName || `${student.name}母亲`,
+            phone: data.motherPhone,
+          },
+        });
+        await prisma.parent.create({
+          data: {
+            userId: motherUser.id,
+            studentId: id,
+            relation: "mother",
+            name: data.motherName || `${student.name}母亲`,
+            phone: data.motherPhone || "",
+            isPrimary: false,
+          },
+        });
+      }
     }
 
     return prisma.student.update({
@@ -447,17 +533,17 @@ export class StudentService {
   /**
    * 脱敏处理 - 非管理员角色隐藏敏感信息
    */
-  private maskSensitive(student: any) {
+  private maskSensitive(student: any, userRole?: string) {
     const masked = { ...student };
     // 身份证只保留后 4 位
     if (masked.idCard) {
       masked.idCard = masked.idCard.replace(/./g, "*").slice(0, -4) + masked.idCard.slice(-4);
     }
-    // 家长电话中间 4 位打星号
+    // 家长电话中间 4 位打星号（管理员不脱敏）
     if (masked.parents) {
       masked.parents = masked.parents.map((p: any) => ({
         ...p,
-        phone: p.phone ? p.phone.slice(0, 3) + "****" + p.phone.slice(7) : p.phone,
+        phone: userRole === "admin" ? p.phone : (p.phone ? p.phone.slice(0, 3) + "****" + p.phone.slice(-4) : p.phone),
       }));
     }
     return masked;

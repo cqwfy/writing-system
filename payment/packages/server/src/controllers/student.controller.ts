@@ -19,6 +19,7 @@ export class StudentController {
         classId: classId ? parseInt(classId as string) : undefined,
         gradeLevel: gradeLevel as string,
         status: status as string,
+        userRole: req.user?.role,
       });
       res.json({ success: true, data: result });
     } catch (err) {
@@ -29,7 +30,7 @@ export class StudentController {
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id);
-      const result = await studentService.getById(id);
+      const result = await studentService.getById(id, req.user?.role);
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
