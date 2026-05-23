@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, message, Modal, Upload, Tag, Space, Descriptions, Form, Input, Select, DatePicker, Tooltip } from "antd";
 import { PlusOutlined, UploadOutlined, DownloadOutlined, EyeOutlined, EditOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
@@ -44,7 +45,7 @@ export function StudentListPage() {
   const handleSubmit = async (values: Record<string, unknown>) => {
     setSubmitLoading(true);
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         ...values,
         enrollmentDate: values.enrollmentDate
           ? (values.enrollmentDate as { format: (f: string) => string }).format("YYYY-MM-DD")
@@ -53,6 +54,11 @@ export function StudentListPage() {
           ? (values.birthDate as { format: (f: string) => string }).format("YYYY-MM-DD")
           : undefined,
       };
+      // 编辑时电话留空不覆盖，新增时允许传空
+      if (editingStudent) {
+        if (!(payload.fatherPhone as string)?.trim()) delete payload.fatherPhone;
+        if (!(payload.motherPhone as string)?.trim()) delete payload.motherPhone;
+      }
 
       if (editingStudent) {
         await api.put(`/students/${editingStudent.id}`, payload);
@@ -72,20 +78,30 @@ export function StudentListPage() {
     }
   };
 
-  const openEdit = (record: StudentRecord) => {
+  const openEdit = async (record: StudentRecord) => {
     setEditingStudent(record);
-    form.setFieldsValue({
-      studentNo: record.studentNo,
-      name: record.name,
-      gender: record.gender,
-      classId: record.class?.id ?? undefined,
-      address: record.address,
-      hobbies: record.hobbies,
-      fatherName: record.parents?.find((p) => p.relation === "father")?.name,
-      fatherPhone: record.parents?.find((p) => p.relation === "father")?.phone,
-      motherName: record.parents?.find((p) => p.relation === "mother")?.name,
-      motherPhone: record.parents?.find((p) => p.relation === "mother")?.phone,
-    });
+    // 加载完整学生详情（含出生日期、入学日期、未脱敏电话等）
+    try {
+      const res = await api.get(`/students/${record.id}`);
+      const detail = res.data.data;
+      form.setFieldsValue({
+        studentNo: detail.studentNo,
+        name: detail.name,
+        gender: detail.gender,
+        classId: detail.class?.id ?? undefined,
+        birthDate: detail.birthDate ? dayjs(detail.birthDate) : undefined,
+        enrollmentDate: detail.enrollmentDate ? dayjs(detail.enrollmentDate) : undefined,
+        address: detail.address,
+        hobbies: detail.hobbies,
+        fatherName: detail.parents?.find((p: any) => p.relation === "father")?.name,
+        fatherPhone: "",
+        motherName: detail.parents?.find((p: any) => p.relation === "mother")?.name,
+        motherPhone: "",
+      });
+    } catch {
+      message.error("加载学生信息失败");
+      return;
+    }
     setFormVisible(true);
   };
 

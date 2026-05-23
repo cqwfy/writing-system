@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, Col, Row, Statistic, Table, Typography, Skeleton, Button, Result, Space } from "antd";
-import { TeamOutlined, UserOutlined, BookOutlined, BankOutlined, ReloadOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { useState, useEffect, useCallback } from "react";
+import { Card, Col, Row, Statistic, Table, Skeleton, Button, Result } from "antd";
+import { TeamOutlined, UserOutlined, BookOutlined, BankOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../stores/auth";
 import api from "../services/api";
 
 const gradeLabels: Record<string, string> = { "7": "七年级", "8": "八年级", "9": "九年级", "10": "高一", "11": "高二", "12": "高三" };
@@ -14,24 +13,8 @@ const statConfig = [
   { key: "courseCount", title: "课程数量", icon: <BookOutlined />, color: "#D97706", bg: "#FFFBEB", link: "/courses" },
 ];
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 6) return "夜深了";
-  if (h < 9) return "早上好";
-  if (h < 12) return "上午好";
-  if (h < 14) return "中午好";
-  if (h < 18) return "下午好";
-  return "晚上好";
-}
-
-function formatDate() {
-  const d = new Date();
-  const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 星期${weekDays[d.getDay()]}`;
-}
 
 export function DashboardPage() {
-  const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -55,8 +38,6 @@ export function DashboardPage() {
     loadStats();
   }, [loadStats]);
 
-  const greeting = useMemo(() => getGreeting(), []);
-
   if (error) {
     return (
       <Result
@@ -73,40 +54,6 @@ export function DashboardPage() {
 
   return (
     <>
-      {/* 欢迎横幅 */}
-      <div style={{
-        background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
-        borderRadius: 12,
-        padding: "24px 28px",
-        marginBottom: 20,
-        color: "#fff",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 12,
-      }}>
-        <div>
-          <Typography.Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 14 }}>
-            {greeting}，{user?.name || "管理员"}
-          </Typography.Text>
-          <Typography.Title level={3} style={{ color: "#fff", margin: "4px 0 0", fontWeight: 600 }}>
-            工作台
-          </Typography.Title>
-          <Typography.Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
-            {formatDate()}
-          </Typography.Text>
-        </div>
-        <Space size={12} wrap>
-          <Button ghost size="small" onClick={() => navigate("/students")}>
-            学生管理 <ArrowRightOutlined />
-          </Button>
-          <Button ghost size="small" onClick={() => navigate("/attendance")}>
-            今日考勤 <ArrowRightOutlined />
-          </Button>
-        </Space>
-      </div>
-
       {/* 统计卡片 */}
       <Row gutter={[16, 16]}>
         {statConfig.map((cfg) => (
