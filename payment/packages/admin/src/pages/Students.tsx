@@ -5,6 +5,7 @@ import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
 import { GENDER_MAP, STUDENT_STATUS_MAP } from "../constants/status";
+import { PageHeader } from "../components/PageHeader";
 
 interface StudentRecord {
   id: number;
@@ -226,7 +227,7 @@ export function StudentListPage() {
         rowKey="id"
         scroll={{ x: 1000 }}
         search={{ labelWidth: "auto" }}
-        headerTitle="学生列表"
+        headerTitle={<PageHeader title="学生列表" desc="管理全校学生信息，支持新增、编辑、导入导出" />}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={openAdd}>
             新增学生

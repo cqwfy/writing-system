@@ -4,6 +4,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 import { BUILDING_TYPE_MAP } from "../constants/status";
 
 interface Building {
@@ -168,7 +169,7 @@ export function DormitoryPage() {
               actionRef={roomActionRef}
               rowKey="id"
               search={false}
-              headerTitle="房间列表"
+              headerTitle={<PageHeader title="房间列表" desc="管理宿舍房间，分配学生入住" />}
               toolBarRender={() => [
                 <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
                   roomForm.resetFields();
@@ -257,7 +258,7 @@ export function DormitoryPage() {
               actionRef={buildingActionRef}
               rowKey="id"
               search={false}
-              headerTitle="楼栋列表"
+              headerTitle={<PageHeader title="楼栋列表" desc="管理宿舍楼信息，设置楼层和类型" />}
               toolBarRender={() => [
                 <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
                   buildingForm.resetFields();

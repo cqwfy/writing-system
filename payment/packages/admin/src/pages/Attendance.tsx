@@ -4,6 +4,7 @@ import { Button, message, Modal, Tag, Space, Form, Select, DatePicker, Tabs } fr
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 import { ATTENDANCE_STATUS_MAP, LEAVE_STATUS_MAP } from "../constants/status";
 
 interface AttendanceRecord {
@@ -109,7 +110,7 @@ export function AttendancePage() {
             actionRef={actionRef}
             rowKey="id"
             search={{ labelWidth: "auto" }}
-            headerTitle="考勤记录"
+            headerTitle={<PageHeader title="考勤记录" desc="查看全校考勤记录，按状态筛选" />}
           />
         ),
       },
@@ -126,7 +127,7 @@ export function AttendancePage() {
             actionRef={leaveActionRef}
             rowKey="id"
             search={false}
-            headerTitle="请假申请"
+            headerTitle={<PageHeader title="请假申请" desc="审批学生请假申请，批准或驳回" />}
           />
         ),
       },

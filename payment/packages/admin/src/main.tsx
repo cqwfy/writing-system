@@ -7,7 +7,18 @@ import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ConfigProvider locale={zhCN}>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        token: {
+          colorPrimary: '#4F46E5',
+          colorInfo: '#4F46E5',
+          borderRadius: 6,
+          colorLink: '#4F46E5',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        },
+      }}
+    >
       <BrowserRouter>
         <App />
       </BrowserRouter>

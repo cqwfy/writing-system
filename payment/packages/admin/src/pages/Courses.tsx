@@ -4,6 +4,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 
 interface CourseRecord {
   id: number;
@@ -118,7 +119,7 @@ export function CourseListPage() {
         actionRef={actionRef}
         rowKey="id"
         search={{ labelWidth: "auto" }}
-        headerTitle="课程列表"
+        headerTitle={<PageHeader title="课程列表" desc="管理课程信息，关联年级、教师和课时" />}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
             setEditingId(null);

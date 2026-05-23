@@ -5,6 +5,7 @@ import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import { useAuthStore } from "../stores/auth";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 
 interface NoticeRecord {
   id: number;
@@ -126,7 +127,7 @@ export function NoticeListPage() {
         actionRef={actionRef}
         rowKey="id"
         search={{ labelWidth: "auto" }}
-        headerTitle="通知公告"
+        headerTitle={<PageHeader title="通知公告" desc="发布和管理全校通知，支持角色定向推送" />}
         toolBarRender={() => isStudentOrParent ? [] : [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
             setEditingId(null);

@@ -4,6 +4,7 @@ import { PlusOutlined, DollarOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 import { PAYMENT_STATUS_MAP } from "../constants/status";
 
 interface FeeItem {
@@ -119,7 +120,7 @@ export function FeesPage() {
             actionRef={paymentActionRef}
             rowKey="id"
             search={{ labelWidth: "auto" }}
-            headerTitle="缴费记录"
+            headerTitle={<PageHeader title="缴费记录" desc="查看全校缴费状态，确认缴费" />}
           />
         ),
       },
@@ -138,7 +139,7 @@ export function FeesPage() {
               actionRef={itemActionRef}
               rowKey="id"
               search={false}
-              headerTitle="费用项目"
+              headerTitle={<PageHeader title="费用项目" desc="创建费用项目，设置金额和适用年级" />}
               toolBarRender={() => [
                 <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
                   form.resetFields();

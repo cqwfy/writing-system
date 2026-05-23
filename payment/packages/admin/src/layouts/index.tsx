@@ -19,6 +19,7 @@ import {
   IdcardOutlined,
   LockOutlined,
   FundOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth";
 import api from "../services/api";
@@ -105,10 +106,16 @@ export function AdminLayout() {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider trigger={null} collapsible collapsed={collapsed} theme="dark">
-        <div style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Typography.Title level={4} style={{ color: "#fff", margin: 0, whiteSpace: "nowrap" }}>
-            {collapsed ? "学管" : "学校管理系统"}
-          </Typography.Title>
+        <div style={{
+          height: 64, display: "flex", alignItems: "center", justifyContent: "center", gap: collapsed ? 0 : 10,
+          background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+        }}>
+          <SafetyCertificateOutlined style={{ fontSize: collapsed ? 26 : 22, color: "#fff" }} />
+          {!collapsed && (
+            <Typography.Title level={5} style={{ color: "#fff", margin: 0, whiteSpace: "nowrap" }}>
+              学校管理系统
+            </Typography.Title>
+          )}
         </div>
         <Menu
           theme="dark"

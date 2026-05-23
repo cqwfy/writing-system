@@ -5,6 +5,7 @@ import { PlusOutlined, SendOutlined, BarChartOutlined, DeleteOutlined, CloseOutl
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 
 interface ExamRecord {
   id: number;
@@ -215,7 +216,7 @@ export function GradesPage() {
               actionRef={examActionRef}
               rowKey="id"
               search={false}
-              headerTitle="考试列表"
+              headerTitle={<PageHeader title="考试列表" desc="创建考试并管理考试安排" />}
               toolBarRender={() => [
                 <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
                   examForm.resetFields();
@@ -272,7 +273,7 @@ export function GradesPage() {
             actionRef={gradeActionRef}
             rowKey="id"
             search={{ labelWidth: "auto" }}
-            headerTitle="成绩列表"
+            headerTitle={<PageHeader title="成绩列表" desc="按考试、科目、班级查询成绩记录" />}
           />
         ),
       },

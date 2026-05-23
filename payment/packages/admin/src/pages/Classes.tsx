@@ -4,6 +4,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 
 interface ClassRecord {
   id: number;
@@ -117,7 +118,7 @@ export function ClassListPage() {
         actionRef={actionRef}
         rowKey="id"
         search={{ labelWidth: "auto" }}
-        headerTitle="班级列表"
+        headerTitle={<PageHeader title="班级列表" desc="按年级管理班级，设置班主任和班号" />}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
             setEditingId(null);

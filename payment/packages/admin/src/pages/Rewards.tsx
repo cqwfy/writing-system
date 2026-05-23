@@ -4,6 +4,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
+import { PageHeader } from "../components/PageHeader";
 
 interface RewardRecord {
   id: number;
@@ -96,7 +97,7 @@ export function RewardListPage() {
         actionRef={actionRef}
         rowKey="id"
         search={{ labelWidth: "auto" }}
-        headerTitle="奖惩记录"
+        headerTitle={<PageHeader title="奖惩记录" desc="记录学生奖励和惩戒，支持按类型筛选" />}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => {
             form.resetFields();
