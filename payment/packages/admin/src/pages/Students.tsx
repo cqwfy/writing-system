@@ -7,7 +7,6 @@ import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
 import { GENDER_MAP, STUDENT_STATUS_MAP } from "../constants/status";
 import { PageHeader } from "../components/PageHeader";
-import { maskPhone } from "../utils/phone";
 
 interface StudentRecord {
   id: number;
@@ -313,7 +312,7 @@ export function StudentListPage() {
             <Descriptions.Item label="住址" span={2}>{currentStudent.address || "-"}</Descriptions.Item>
             {currentStudent.parents?.map((p) => (
               <Descriptions.Item key={p.relation} label={p.relation === "father" ? "父亲" : "母亲"}>
-                {p.name} - {maskPhone(p.phone)}
+                {p.name} - {p.phone}
               </Descriptions.Item>
             ))}
           </Descriptions>

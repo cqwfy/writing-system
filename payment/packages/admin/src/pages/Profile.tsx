@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, Descriptions, Tag, Spin, Typography } from "antd";
 import api from "../services/api";
-import { maskPhone } from "../utils/phone";
 
 export function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -41,7 +40,7 @@ export function ProfilePage() {
             <Descriptions.Item label="角色">
               <Tag color={roleMap[profile.role]?.color}>{roleMap[profile.role]?.label || profile.role}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="手机号">{maskPhone(profile.phone)}</Descriptions.Item>
+            <Descriptions.Item label="手机号">{profile.phone || "-"}</Descriptions.Item>
             {profile.student && (
               <>
                 <Descriptions.Item label="学号">{profile.student.studentNo}</Descriptions.Item>
