@@ -27,6 +27,43 @@ export class AuthService {
       throw new AppError(401, "用户名或密码错误");
     }
 
+    // 禁止学生和家长通过 Web 后台登录
+    if (user.role === Role.STUDENT || user.role === Role.PARENT) {
+      throw new AppError(403, "学生和家长请使用手机端登录");
+    }
+
+    return this.buildLoginResponse(user);
+  }
+
+  /**
+   * 移动端登录（学号/手机号 + 密码）
+   */
+  async loginByMobile(loginId: string, password: string) {
+    let user;
+
+    // 先按学号查学生
+    const student = await prisma.student.findFirst({
+      where: { studentNo: loginId, deletedAt: null },
+    });
+    if (student) {
+      if (!student.userId) throw new AppError(400, "该学号尚未创建登录账号");
+      user = await prisma.user.findUnique({ where: { id: student.userId } });
+    } else {
+      // 再按手机号查家长
+      const parent = await prisma.parent.findFirst({ where: { phone: loginId } });
+      if (parent) {
+        if (!parent.userId) throw new AppError(400, "该手机号尚未创建登录账号");
+        user = await prisma.user.findUnique({ where: { id: parent.userId } });
+      }
+    }
+
+    if (!user) throw new AppError(401, "学号或手机号错误");
+    if (!user.passwordHash) throw new AppError(401, "该账号未设置密码");
+    if (user.status !== "active") throw new AppError(403, "账号已被禁用");
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) throw new AppError(401, "密码错误");
+
     return this.buildLoginResponse(user);
   }
 

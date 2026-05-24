@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { authService } from "../services/auth.service";
-import { loginSchema, wechatLoginSchema, bindUserSchema } from "@sms/shared";
+import { loginSchema, wechatLoginSchema, bindUserSchema, mobileLoginSchema } from "@sms/shared";
 import { z } from "zod";
 
 const changePasswordSchema = z.object({
@@ -33,6 +33,16 @@ export class AuthController {
     try {
       const { tempToken, bindType, bindValue } = bindUserSchema.parse(req.body);
       const result = await authService.bindWechatUser(tempToken, bindType, bindValue);
+      res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async mobileLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { loginId, password } = mobileLoginSchema.parse(req.body);
+      const result = await authService.loginByMobile(loginId, password);
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);

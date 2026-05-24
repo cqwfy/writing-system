@@ -17,6 +17,11 @@ export const bindUserSchema = z.object({
   bindValue: z.string().min(1),
 });
 
+export const mobileLoginSchema = z.object({
+  loginId: z.string().min(1).max(50),
+  password: z.string().min(6).max(100),
+});
+
 // ============ 学生 ============
 export const createStudentSchema = z.object({
   studentNo: z.string().min(1).max(20),
