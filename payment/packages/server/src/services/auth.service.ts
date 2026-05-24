@@ -29,7 +29,7 @@ export class AuthService {
 
     // 禁止学生和家长通过 Web 后台登录
     if (user.role === Role.STUDENT || user.role === Role.PARENT) {
-      throw new AppError(403, "学生和家长请使用手机端登录");
+      throw new AppError(403, "学生和家长请用学号和手机号登陆");
     }
 
     return this.buildLoginResponse(user);

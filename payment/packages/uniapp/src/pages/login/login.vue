@@ -22,18 +22,8 @@
       <view class="form-card">
         <view class="form-title">账号登录</view>
 
-        <!-- 角色切换 -->
-        <view class="role-tabs">
-          <view class="role-tab" :class="{ active: loginRole === 'student' }" @click="loginRole = 'student'">
-            学生
-          </view>
-          <view class="role-tab" :class="{ active: loginRole === 'parent' }" @click="loginRole = 'parent'">
-            家长
-          </view>
-        </view>
-
         <view class="input-group">
-          <input class="input" v-model="loginId" :placeholder="loginRole === 'student' ? '请输入学号' : '请输入手机号'" />
+          <input class="input" v-model="loginId" placeholder="请输入学号或手机号" />
         </view>
         <view class="input-group">
           <input class="input" v-model="password" type="password" placeholder="请输入密码" />
@@ -84,7 +74,6 @@ const showBind = ref(false)
 const tempToken = ref('')
 const bindType = ref('student_no')
 const bindValue = ref('')
-const loginRole = ref('student')
 const loginId = ref('')
 const password = ref('')
 
@@ -130,7 +119,7 @@ function handleWechatLogin() {
 // 账号密码登录（APP/H5）
 async function handlePasswordLogin() {
   if (!loginId.value.trim()) {
-    uni.showToast({ title: loginRole.value === 'student' ? '请输入学号' : '请输入手机号', icon: 'none' })
+    uni.showToast({ title: '请输入学号或手机号', icon: 'none' })
     return
   }
   if (!password.value.trim()) { uni.showToast({ title: '请输入密码', icon: 'none' }); return }
@@ -201,13 +190,7 @@ function handleSkip() {
 
 /* 账号密码登录 */
 .form-card { width: 100%; background: #fff; border-radius: 16rpx; padding: 48rpx 40rpx; }
-.form-title { font-size: 36rpx; font-weight: bold; color: #333; text-align: center; margin-bottom: 32rpx; }
-.role-tabs { display: flex; gap: 0; margin-bottom: 32rpx; border-radius: 12rpx; overflow: hidden; border: 2rpx solid #1677ff; }
-.role-tab {
-  flex: 1; text-align: center; padding: 16rpx 0; font-size: 28rpx;
-  color: #1677ff; background: #fff; transition: all 0.2s;
-}
-.role-tab.active { color: #fff; background: #1677ff; }
+.form-title { font-size: 36rpx; font-weight: bold; color: #333; text-align: center; margin-bottom: 40rpx; }
 .input-group { margin-bottom: 28rpx; }
 .input {
   width: 100%; height: 88rpx; border: 2rpx solid #e8e8e8;
