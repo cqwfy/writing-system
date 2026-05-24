@@ -533,18 +533,11 @@ export class StudentService {
   /**
    * 脱敏处理 - 非管理员角色隐藏敏感信息
    */
-  private maskSensitive(student: any, userRole?: string) {
+  private maskSensitive(student: any, _userRole?: string) {
     const masked = { ...student };
     // 身份证只保留后 4 位
     if (masked.idCard) {
       masked.idCard = masked.idCard.replace(/./g, "*").slice(0, -4) + masked.idCard.slice(-4);
-    }
-    // 家长电话中间 4 位打星号（管理员不脱敏）
-    if (masked.parents) {
-      masked.parents = masked.parents.map((p: any) => ({
-        ...p,
-        phone: userRole === "admin" ? p.phone : (p.phone ? p.phone.slice(0, 3) + "****" + p.phone.slice(-4) : p.phone),
-      }));
     }
     return masked;
   }
