@@ -5,6 +5,7 @@ import { ProTable } from "@ant-design/pro-components";
 import type { ProColumns, ActionType } from "@ant-design/pro-components";
 import api from "../services/api";
 import { PageHeader } from "../components/PageHeader";
+import { maskPhone } from "../utils/phone";
 
 interface TeacherRecord {
   id: number;
@@ -85,7 +86,9 @@ export function TeacherListPage() {
         信息技术: "信息技术",
       },
     },
-    { title: "电话", dataIndex: "phone", key: "phone", width: 130, search: false },
+    { title: "电话", dataIndex: "phone", key: "phone", width: 130, search: false,
+      render: (_, r) => maskPhone(r.phone),
+    },
     {
       title: "账号",
       dataIndex: "username",
